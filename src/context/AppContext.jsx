@@ -223,6 +223,7 @@ export const AppProvider = ({ children }) => {
 
     // 3. Map frontend package ID to backend package ID
     const packageMap = {
+      'test_the_lsr': 'test_the_lsr',
       'ruong_skin_ss': 'ruong_ss',
       'full_3_ruong': 'full_ruong',
       '25_bi_le': 'ruong_ss',
@@ -230,7 +231,7 @@ export const AppProvider = ({ children }) => {
       'goi_vip': 'full_ruong',
       'goi_svip': 'full_ruong',
     };
-    const backendPackageId = packageMap[currentPackage.id] || 'ruong_ss';
+    const backendPackageId = packageMap[currentPackage.id] || 'test_the_lsr';
 
     const codesList = isBulk ? parsedBulkCodes : [friendCode.trim()];
 

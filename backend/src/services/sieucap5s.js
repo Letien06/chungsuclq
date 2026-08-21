@@ -84,45 +84,112 @@ class SieuCap5sAutomation {
   }
 
   /**
-   * Load saved cookies from file
+   * Load saved cookies from Firestore or local file
    */
-  _loadCookies() {
+  async _loadCookies() {
+    // 1. Try loading from Firestore first
+    try {
+      const { getFirestore } = require('firebase-admin/firestore');
+      const db = getFirestore();
+      const doc = await db.collection('settings').doc('sieucap5s_cookies').get();
+      if (doc.exists && doc.data()?.cookies) {
+        const cookies = doc.data().cookies;
+        if (Array.isArray(cookies) && cookies.length > 0) {
+          console.log(`[Cookies] Loaded ${cookies.length} cookies from Firestore`);
+          return cookies;
+        }
+      }
+    } catch (e) {
+      console.warn('[Cookies] Could not load from Firestore:', e.message);
+    }
+
+    // 2. Fallback to local file
     try {
       if (fs.existsSync(COOKIES_FILE)) {
         const data = fs.readFileSync(COOKIES_FILE, 'utf8');
-        return JSON.parse(data);
+        const cookies = JSON.parse(data);
+        console.log(`[Cookies] Loaded ${cookies.length} cookies from local file`);
+        return cookies;
       }
     } catch (e) {
-      console.error('[Cookies] Error loading:', e.message);
+      console.error('[Cookies] Error loading local file:', e.message);
     }
     return null;
   }
 
   /**
-   * Save cookies to file
+   * Save cookies to Firestore and local file
    */
-  _saveCookies(cookies) {
+  async _saveCookies(cookies) {
+    // Save to local file
     try {
       const dir = path.dirname(COOKIES_FILE);
       if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
       fs.writeFileSync(COOKIES_FILE, JSON.stringify(cookies, null, 2));
-      console.log(`[Cookies] Saved ${cookies.length} cookies`);
+      console.log(`[Cookies] Saved ${cookies.length} cookies to local file`);
     } catch (e) {
-      console.error('[Cookies] Error saving:', e.message);
+      console.error('[Cookies] Error saving local:', e.message);
+    }
+
+    // Save to Firestore
+    try {
+      const { getFirestore, FieldValue } = require('firebase-admin/firestore');
+      const db = getFirestore();
+      await db.collection('settings').doc('sieucap5s_cookies').set({
+        cookies,
+        updatedAt: FieldValue.serverTimestamp(),
+      });
+      console.log(`[Cookies] Saved ${cookies.length} cookies to Firestore`);
+    } catch (e) {
+      console.warn('[Cookies] Could not save to Firestore:', e.message);
     }
   }
 
   /**
+   * Helper to parse raw cookie header string into Puppeteer cookie format
+   */
+  static parseCookieString(cookieStr, domain = '.sieucap5s.com') {
+    if (!cookieStr || typeof cookieStr !== 'string') return [];
+    
+    // Check if it's already a JSON array
+    try {
+      const parsed = JSON.parse(cookieStr);
+      if (Array.isArray(parsed)) return parsed;
+    } catch (e) {
+      // Not JSON, parse as header string
+    }
+
+    const cookies = [];
+    const parts = cookieStr.split(';');
+    for (const part of parts) {
+      const trimmed = part.trim();
+      if (!trimmed) continue;
+      const eqIdx = trimmed.indexOf('=');
+      if (eqIdx === -1) continue;
+      const name = trimmed.substring(0, eqIdx).trim();
+      const value = trimmed.substring(eqIdx + 1).trim();
+      if (name) {
+        cookies.push({
+          name,
+          value,
+          domain: domain,
+          path: '/',
+        });
+      }
+    }
+    return cookies;
+  }
+
+  /**
    * Login using saved cookies
-   * User must run save-cookies script first to manually login via Google OAuth
    */
   async login() {
     if (!this.browser) throw new Error('Browser not initialized');
 
-    const cookies = this._loadCookies();
+    const cookies = await this._loadCookies();
     if (!cookies || cookies.length === 0) {
       throw new Error(
-        'No saved cookies found! Please run "npm run save-cookies" first to login to sieucap5s manually.'
+        'Chưa có cookies SieuCap5s! Vui lòng vào trang Admin (/admin) mục Cookies để dán Cookies hoặc chạy "npm run save-cookies".'
       );
     }
 
@@ -160,7 +227,7 @@ class SieuCap5sAutomation {
 
       // Update cookies (they may have been refreshed)
       const freshCookies = await page.cookies();
-      this._saveCookies(freshCookies);
+      await this._saveCookies(freshCookies);
 
       this.isLoggedIn = true;
       console.log('[Login] Successfully authenticated via cookies');
@@ -214,7 +281,7 @@ class SieuCap5sAutomation {
     const page = await this.browser.newPage();
 
     // Restore cookies
-    const cookies = this._loadCookies();
+    const cookies = await this._loadCookies();
     if (cookies) await page.setCookie(...cookies);
 
     try {

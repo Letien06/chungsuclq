@@ -1,5 +1,17 @@
 export const PACKAGES = [
   {
+    id: 'test_the_lsr',
+    name: '🎁 TEST TOOL: TẶNG THẺ LSR',
+    price: 0,
+    memberPrice: 0,
+    bi: 25,
+    speedText: 'Test trực tiếp SieuCap5s',
+    progress: 100,
+    badge: 'TEST MIỄN PHÍ',
+    isPriority: true,
+    description: 'Test gửi mã quà tặng SK Thẻ LSR trực tiếp qua tool sieucap5s.com (1 Acc test)'
+  },
+  {
     id: 'full_3_ruong',
     name: 'FULL 3 RƯƠNG',
     price: 50000,
@@ -8,7 +20,7 @@ export const PACKAGES = [
     speedText: 'Tốc độ siêu tốc',
     progress: 90,
     badge: 'ƯU TIÊN',
-    isPriority: true,
+    isPriority: false,
     description: 'Cày full 3 rương sự kiện nhanh nhất, nhận tối đa quà tặng'
   },
   {

@@ -20,6 +20,13 @@ const config = {
   // Package definitions
   // Admin can change these via settings API
   defaultPackages: {
+    test_the_lsr: {
+      id: 'test_the_lsr',
+      name: 'Test Thẻ LSR (1 Acc)',
+      accRequired: 1,
+      biPerAcc: 25,
+      totalBi: 25,
+    },
     ruong_ss: {
       id: 'ruong_ss',
       name: 'Rương SS',

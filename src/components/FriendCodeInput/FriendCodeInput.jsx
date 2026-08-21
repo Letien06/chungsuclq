@@ -5,6 +5,7 @@ import styles from './FriendCodeInput.module.css';
 
 export const FriendCodeInput = () => {
   const {
+    selectedPackageId,
     friendCode,
     setFriendCode,
     isBulk,
@@ -15,6 +16,8 @@ export const FriendCodeInput = () => {
     openModal,
     addToast
   } = useApp();
+
+  const isLsrTest = selectedPackageId === 'test_the_lsr';
 
   const handlePaste = async () => {
     try {
@@ -37,7 +40,9 @@ export const FriendCodeInput = () => {
       <div className={styles.headerRow}>
         <div className={styles.titleBox}>
           <span className={styles.stepNumber}>3.</span>
-          <h2 className={styles.sectionTitle}>MÃ MỜI (FRIEND CODE)</h2>
+          <h2 className={styles.sectionTitle}>
+            {isLsrTest ? 'MÃ QUÀ TẶNG THẺ LSR' : 'MÃ MỜI (FRIEND CODE)'}
+          </h2>
           <span className={styles.requiredStar}>*</span>
         </div>
 
@@ -62,7 +67,11 @@ export const FriendCodeInput = () => {
           <input
             type="text"
             className={styles.inputField}
-            placeholder="Nhập 1 Mã Mời (Friend Code)..."
+            placeholder={
+              isLsrTest
+                ? "Nhập 1 Mã Quà Tặng Thẻ LSR dùng chung cho tất cả tài khoản..."
+                : "Nhập 1 Mã Mời (Friend Code)..."
+            }
             value={friendCode}
             onChange={(e) => setFriendCode(e.target.value)}
           />

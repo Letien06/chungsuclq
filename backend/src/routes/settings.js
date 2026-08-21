@@ -1,10 +1,12 @@
 /**
- * Express API Router - Settings (Admin)
- * Manages package configuration (number of accounts per package, etc.)
+ * Express API Router - Settings & Test Tool (Admin)
+ * Manages package configuration, cookies, and live tool testing
  */
 const express = require('express');
 const { getFirestore, FieldValue } = require('firebase-admin/firestore');
 const config = require('../config');
+const SieuCap5sAutomation = require('../services/sieucap5s');
+const accountPool = require('../services/accountPool');
 
 const router = express.Router();
 
@@ -18,7 +20,6 @@ router.get('/', async (req, res) => {
     const doc = await db.collection('settings').doc('packages').get();
 
     if (!doc.exists) {
-      // Return defaults
       res.json({
         packages: config.defaultPackages,
         isDefault: true,
@@ -38,10 +39,6 @@ router.get('/', async (req, res) => {
 /**
  * PUT /api/settings
  * Update package settings
- * Body: {
- *   ruong_ss: { name: "Rương SS", accRequired: 4, biPerAcc: 25, totalBi: 100 },
- *   full_ruong: { name: "Full 3 Rương", accRequired: 10, biPerAcc: 25, totalBi: 250 }
- * }
  */
 router.put('/', async (req, res) => {
   try {
@@ -58,7 +55,6 @@ router.put('/', async (req, res) => {
           error: `Invalid package ${id}: requires name, accRequired, biPerAcc`,
         });
       }
-      // Ensure totalBi is calculated
       pkg.totalBi = pkg.accRequired * pkg.biPerAcc;
       pkg.id = id;
     }
@@ -94,6 +90,110 @@ router.post('/reset', async (req, res) => {
   } catch (error) {
     console.error('[API] Reset settings error:', error);
     res.status(500).json({ error: error.message });
+  }
+});
+
+/**
+ * GET /api/settings/cookies
+ * Check current cookie status
+ */
+router.get('/cookies', async (req, res) => {
+  try {
+    const db = getFirestore();
+    const doc = await db.collection('settings').doc('sieucap5s_cookies').get();
+
+    if (!doc.exists || !doc.data()?.cookies) {
+      return res.json({ hasCookies: false, count: 0 });
+    }
+
+    const data = doc.data();
+    res.json({
+      hasCookies: true,
+      count: data.cookies?.length || 0,
+      updatedAt: data.updatedAt?.toDate?.()?.toISOString?.() || null,
+    });
+  } catch (error) {
+    console.error('[API] Get cookies status error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+/**
+ * POST /api/settings/cookies
+ * Save cookies from admin UI
+ * Body: { cookies: "cookie string or JSON array" }
+ */
+router.post('/cookies', async (req, res) => {
+  try {
+    const { cookies } = req.body;
+
+    if (!cookies) {
+      return res.status(400).json({ error: 'Missing cookies data' });
+    }
+
+    const parsedCookies = SieuCap5sAutomation.parseCookieString(cookies);
+    if (!parsedCookies || parsedCookies.length === 0) {
+      return res.status(400).json({ error: 'Invalid cookie format. Paste document.cookie or JSON format.' });
+    }
+
+    const automation = new SieuCap5sAutomation();
+    await automation._saveCookies(parsedCookies);
+
+    res.json({
+      success: true,
+      message: `Đã lưu ${parsedCookies.length} cookies thành công!`,
+      count: parsedCookies.length,
+    });
+  } catch (error) {
+    console.error('[API] Save cookies error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+/**
+ * POST /api/settings/test-tool
+ * Live test of SieuCap5s tool
+ * Body: { code: "Mã Quà Tặng LSR" }
+ */
+router.post('/test-tool', async (req, res) => {
+  const { code } = req.body;
+
+  if (!code || !code.trim()) {
+    return res.status(400).json({ error: 'Vui lòng nhập Mã Quà Tặng / Mã Chung Sức để test!' });
+  }
+
+  // Get available accounts
+  const accounts = await accountPool.getAvailableAccounts(1);
+  if (accounts.length === 0) {
+    return res.status(400).json({
+      error: 'Kho ACC đang trống! Vui lòng vào mục Kho ACC nạp ít nhất 1 tài khoản để chạy test.'
+    });
+  }
+
+  let automation = null;
+  try {
+    console.log(`[TestTool] Starting test with code: ${code.trim()} and 1 account (${accounts[0].username})`);
+    automation = new SieuCap5sAutomation();
+    await automation.init();
+    await automation.login();
+
+    const results = await automation.runTool([accounts[0]], code.trim());
+
+    res.json({
+      success: true,
+      message: 'Chạy test tool thành công!',
+      results,
+    });
+  } catch (error) {
+    console.error('[TestTool] Error:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message,
+    });
+  } finally {
+    if (automation) {
+      await automation.close();
+    }
   }
 });
 
