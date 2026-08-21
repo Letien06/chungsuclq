@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, useRef, useCallback } from 'react';
 import { PACKAGES, INITIAL_TICKER_ITEMS, SAMPLE_HISTORIES } from '../data/packages';
 import * as api from '../services/api';
+import { signInWithGoogle, signOutUser } from '../services/firebaseAuth';
 import confetti from 'canvas-confetti';
 
 const AppContext = createContext();
@@ -13,7 +14,7 @@ export const AppProvider = ({ children }) => {
   });
 
   // 2. Order Form State
-  const [selectedPackageId, setSelectedPackageId] = useState('ruong_skin_ss');
+  const [selectedPackageId, setSelectedPackageId] = useState('test_the_lsr');
   const [quantity, setQuantity] = useState(1);
   const [friendCode, setFriendCode] = useState('');
   const [isBulk, setIsBulk] = useState(false);
@@ -43,6 +44,9 @@ export const AppProvider = ({ children }) => {
   useEffect(() => {
     if (user) {
       localStorage.setItem('cslq_user', JSON.stringify(user));
+      if (user.uid) {
+        localStorage.setItem('cslq_user_' + user.uid, JSON.stringify(user));
+      }
     } else {
       localStorage.removeItem('cslq_user');
     }
@@ -73,6 +77,32 @@ export const AppProvider = ({ children }) => {
   };
 
   // Auth Methods
+  const loginWithGoogle = async () => {
+    try {
+      const googleUser = await signInWithGoogle();
+      const savedUser = localStorage.getItem('cslq_user_' + googleUser.uid);
+      const existingBalance = savedUser ? JSON.parse(savedUser).balance : 250000;
+
+      const newUser = {
+        uid: googleUser.uid,
+        email: googleUser.email,
+        username: googleUser.email.split('@')[0],
+        displayName: googleUser.displayName,
+        avatar: googleUser.avatar,
+        balance: existingBalance,
+        isVip: true,
+      };
+
+      setUser(newUser);
+      localStorage.setItem('cslq_user_' + googleUser.uid, JSON.stringify(newUser));
+      addToast('Đăng nhập thành công', `Chào mừng ${newUser.displayName}!`, 'success');
+      closeModal();
+    } catch (error) {
+      if (error.code === 'auth/popup-closed-by-user') return;
+      addToast('Lỗi đăng nhập Google', error.message || 'Không thể đăng nhập Google', 'error');
+    }
+  };
+
   const login = (username, customBalance = 250000) => {
     const newUser = {
       username: username || 'Gamer_VIP',
@@ -86,7 +116,10 @@ export const AppProvider = ({ children }) => {
     closeModal();
   };
 
-  const logout = () => {
+  const logout = async () => {
+    try {
+      await signOutUser();
+    } catch (e) { /* ignore */ }
     setUser(null);
     addToast('Đã đăng xuất', 'Hẹn gặp lại bạn!', 'info');
   };
@@ -312,6 +345,7 @@ export const AppProvider = ({ children }) => {
       value={{
         user,
         login,
+        loginWithGoogle,
         logout,
         topUpBalance,
         packages: PACKAGES,
