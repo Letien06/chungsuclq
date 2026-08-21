@@ -12,26 +12,48 @@ const router = express.Router();
 
 /**
  * GET /api/settings
- * Get current settings (packages config)
+ * Get current settings (packages and siteInfo)
  */
 router.get('/', async (req, res) => {
   try {
     const db = getFirestore();
-    const doc = await db.collection('settings').doc('packages').get();
+    const [pkgDoc, siteDoc] = await Promise.all([
+      db.collection('settings').doc('packages').get(),
+      db.collection('settings').doc('site_info').get(),
+    ]);
 
-    if (!doc.exists) {
-      res.json({
-        packages: config.defaultPackages,
-        isDefault: true,
-      });
-    } else {
-      res.json({
-        packages: doc.data(),
-        isDefault: false,
-      });
-    }
+    res.json({
+      packages: pkgDoc.exists ? pkgDoc.data() : config.defaultPackages,
+      siteInfo: siteDoc.exists ? siteDoc.data() : config.defaultSiteInfo,
+      isDefault: !pkgDoc.exists,
+    });
   } catch (error) {
     console.error('[API] Get settings error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+/**
+ * PUT /api/settings/site-info
+ * Update branding & site info
+ */
+router.put('/site-info', async (req, res) => {
+  try {
+    const siteInfo = req.body;
+    if (!siteInfo || typeof siteInfo !== 'object') {
+      return res.status(400).json({ error: 'Invalid siteInfo format' });
+    }
+
+    const db = getFirestore();
+    await db.collection('settings').doc('site_info').set(siteInfo, { merge: true });
+
+    console.log('[API] Site info updated:', JSON.stringify(siteInfo));
+    res.json({
+      success: true,
+      siteInfo,
+    });
+  } catch (error) {
+    console.error('[API] Update site-info error:', error);
     res.status(500).json({ error: error.message });
   }
 });

@@ -4,7 +4,11 @@ import { ShieldCheck, MessageCircle, Send, Heart, HelpCircle, FileText, Lock } f
 import styles from './Footer.module.css';
 
 export const Footer = () => {
-  const { openModal } = useApp();
+  const { openModal, siteInfo } = useApp();
+
+  const brandFullName = siteInfo
+    ? `${siteInfo.brandPrimary || 'CHUNGSUC'}${siteInfo.brandAccent || 'LIENQUAN'}${siteInfo.brandDomain || '.COM'}`
+    : 'CHUNGSUCLIENQUAN.COM';
 
   return (
     <footer className={styles.footer}>
@@ -17,8 +21,8 @@ export const Footer = () => {
                 <img src="/arthur.png" alt="Arthur 5v5" className={styles.footerLogoImg} />
               </div>
               <div className={styles.logoText}>
-                <span className={styles.logoName}>CHUNGSUCLIENQUAN.COM</span>
-                <span className={styles.logoSub}>Hệ Thống Cày Tự Động Siêu Tốc</span>
+                <span className={styles.logoName}>{siteInfo?.footerTitle || brandFullName}</span>
+                <span className={styles.logoSub}>{siteInfo?.footerSubtitle || 'Hệ Thống Cày Tự Động Siêu Tốc'}</span>
               </div>
             </div>
 

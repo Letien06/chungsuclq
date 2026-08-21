@@ -101,6 +101,13 @@ export async function updateSettings(packages) {
   });
 }
 
+export async function updateSiteInfo(siteInfo) {
+  return apiRequest('/settings/site-info', {
+    method: 'PUT',
+    body: JSON.stringify(siteInfo),
+  });
+}
+
 export async function resetSettings() {
   return apiRequest('/settings/reset', {
     method: 'POST',

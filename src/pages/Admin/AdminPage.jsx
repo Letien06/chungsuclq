@@ -22,6 +22,17 @@ export function AdminPage() {
   const [settingsEditing, setSettingsEditing] = useState(false);
   const [editedSettings, setEditedSettings] = useState({});
 
+  // Branding & Site Info
+  const [siteInfo, setSiteInfo] = useState(null);
+  const [editedSiteInfo, setEditedSiteInfo] = useState({
+    brandPrimary: 'CHUNGSUC',
+    brandAccent: 'LIENQUAN',
+    brandDomain: '.COM',
+    brandSubtitle: 'SỰ KIỆN CHUNG SỨC • UY TÍN • SIÊU TỐC',
+    footerTitle: 'CHUNGSUCLIENQUAN.COM',
+    footerSubtitle: 'Hệ Thống Cày Tự Động Siêu Tốc',
+  });
+
   // Cookies Management
   const [cookieStatus, setCookieStatus] = useState(null);
   const [cookieInput, setCookieInput] = useState('');
@@ -79,12 +90,29 @@ export function AdminPage() {
       setOrders(ordersData.orders || []);
       setSettings(settingsData);
       setEditedSettings(settingsData.packages || {});
+      if (settingsData.siteInfo) {
+        setSiteInfo(settingsData.siteInfo);
+        setEditedSiteInfo(settingsData.siteInfo);
+      }
       setCookieStatus(cookiesData);
     } catch (err) {
       console.error('Load dashboard error:', err);
     }
     setLoading(false);
   }, [isAuthed]);
+
+  // Save Site Info & Branding
+  const handleSaveSiteInfo = async () => {
+    setLoading(true);
+    try {
+      await api.updateSiteInfo(editedSiteInfo);
+      alert('Đã lưu thông tin tên miền & thương hiệu thành công!');
+      loadDashboard();
+    } catch (err) {
+      alert('Lỗi: ' + err.message);
+    }
+    setLoading(false);
+  };
 
   useEffect(() => {
     // Check if admin password is saved
@@ -275,9 +303,10 @@ export function AdminPage() {
           { id: 'dashboard', label: '📊 Dashboard' },
           { id: 'orders', label: '📦 Đơn hàng' },
           { id: 'accounts', label: '👥 Kho ACC' },
+          { id: 'branding', label: '🌐 Tên Miền & Logo' },
+          { id: 'settings', label: '⚙️ Giá & Gói Cước' },
           { id: 'test', label: '🧪 Test Tool SieuCap5s' },
           { id: 'cookies', label: '🍪 Cookies SieuCap5s' },
-          { id: 'settings', label: '⚙️ Cấu hình' },
         ].map((tab) => (
           <button
             key={tab.id}
@@ -627,6 +656,159 @@ export function AdminPage() {
                   )}
                 </div>
               )}
+            </div>
+          </div>
+        )}
+
+        {/* ========== BRANDING & SITE INFO ========== */}
+        {activeTab === 'branding' && (
+          <div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+              <div>
+                <h2 className={styles.sectionTitle} style={{ margin: 0 }}>🌐 Cấu Hình Tên Miền & Thương Hiệu Logo</h2>
+                <p className={styles.settingsHint} style={{ margin: '4px 0 0 0' }}>
+                  Tùy chỉnh tên thương hiệu, đuôi tên miền (.COM, .VN...), slogan Header và Footer của website.
+                </p>
+              </div>
+              <button
+                className={styles.saveBtn}
+                onClick={handleSaveSiteInfo}
+                disabled={loading}
+                style={{ padding: '10px 24px' }}
+              >
+                {loading ? '⏳ Đang lưu...' : '💾 Lưu Tên Miền & Thương Hiệu'}
+              </button>
+            </div>
+
+            {/* Live Preview Box */}
+            <div style={{ background: '#0b0e14', border: '1px solid rgba(234, 179, 8, 0.4)', borderRadius: 12, padding: '20px 24px', marginBottom: 24, boxShadow: '0 8px 30px rgba(0,0,0,0.5)' }}>
+              <div style={{ fontSize: 12, color: '#eab308', textTransform: 'uppercase', letterSpacing: '1px', fontWeight: 'bold', marginBottom: 12 }}>
+                👁️ Xem Trước Trực Tiếp Logo Header:
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 14, background: '#111827', padding: '12px 20px', borderRadius: 8, border: '1px solid rgba(255,255,255,0.08)', width: 'fit-content' }}>
+                <img src="/arthur.png" alt="Arthur" style={{ width: 44, height: 44, borderRadius: 8, border: '2px solid #eab308' }} />
+                <div>
+                  <div style={{ fontSize: 20, fontWeight: 900, fontFamily: 'Times New Roman, serif', letterSpacing: '0.5px' }}>
+                    <span style={{ color: '#ffffff' }}>{editedSiteInfo.brandPrimary || 'CHUNGSUC'}</span>
+                    <span style={{ color: '#ff6600' }}>{editedSiteInfo.brandAccent || 'LIENQUAN'}</span>
+                    <span style={{ color: '#ff6600' }}>{editedSiteInfo.brandDomain || '.COM'}</span>
+                  </div>
+                  <div style={{ fontSize: 11, color: '#9ca3af', textTransform: 'uppercase', letterSpacing: '0.5px', marginTop: 2 }}>
+                    {editedSiteInfo.brandSubtitle || 'SỰ KIỆN CHUNG SỨC • UY TÍN • SIÊU TỐC'}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Settings Form */}
+            <div className={styles.importSection}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 20 }}>
+                {/* Brand Primary */}
+                <div>
+                  <label style={{ display: 'block', color: '#fff', fontWeight: 'bold', marginBottom: 6 }}>
+                    1. Tên thương hiệu phần 1 (Chữ Trắng):
+                  </label>
+                  <input
+                    type="text"
+                    className={styles.loginInput}
+                    value={editedSiteInfo.brandPrimary || ''}
+                    onChange={(e) => setEditedSiteInfo((prev) => ({ ...prev, brandPrimary: e.target.value }))}
+                    placeholder="VD: CHUNGSUC, DICHVU, SHOP..."
+                    style={{ maxWidth: '100%' }}
+                  />
+                  <span style={{ fontSize: 12, color: '#9ca3af' }}>Hiển thị màu trắng ở đầu logo</span>
+                </div>
+
+                {/* Brand Accent */}
+                <div>
+                  <label style={{ display: 'block', color: '#ff6600', fontWeight: 'bold', marginBottom: 6 }}>
+                    2. Tên thương hiệu phần 2 (Chữ Cam):
+                  </label>
+                  <input
+                    type="text"
+                    className={styles.loginInput}
+                    value={editedSiteInfo.brandAccent || ''}
+                    onChange={(e) => setEditedSiteInfo((prev) => ({ ...prev, brandAccent: e.target.value }))}
+                    placeholder="VD: LIENQUAN, GAMER, AUTO..."
+                    style={{ maxWidth: '100%' }}
+                  />
+                  <span style={{ fontSize: 12, color: '#9ca3af' }}>Hiển thị màu cam nổi bật</span>
+                </div>
+
+                {/* Brand Domain */}
+                <div>
+                  <label style={{ display: 'block', color: '#eab308', fontWeight: 'bold', marginBottom: 6 }}>
+                    3. Đuôi tên miền (Domain):
+                  </label>
+                  <input
+                    type="text"
+                    className={styles.loginInput}
+                    value={editedSiteInfo.brandDomain || ''}
+                    onChange={(e) => setEditedSiteInfo((prev) => ({ ...prev, brandDomain: e.target.value }))}
+                    placeholder="VD: .COM, .VN, .NET, .ONLINE..."
+                    style={{ maxWidth: '100%' }}
+                  />
+                  <span style={{ fontSize: 12, color: '#9ca3af' }}>Đuôi website (thay đổi khi bạn trỏ tên miền mới)</span>
+                </div>
+              </div>
+
+              {/* Slogan & Subtitle */}
+              <div style={{ marginTop: 20 }}>
+                <label style={{ display: 'block', color: '#93c5fd', fontWeight: 'bold', marginBottom: 6 }}>
+                  4. Slogan Header (Dòng chữ nhỏ dưới logo):
+                </label>
+                <input
+                  type="text"
+                  className={styles.loginInput}
+                  value={editedSiteInfo.brandSubtitle || ''}
+                  onChange={(e) => setEditedSiteInfo((prev) => ({ ...prev, brandSubtitle: e.target.value }))}
+                  placeholder="VD: SỰ KIỆN CHUNG SỨC • UY TÍN • SIÊU TỐC"
+                  style={{ maxWidth: '100%' }}
+                />
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 20, marginTop: 20 }}>
+                {/* Footer Title */}
+                <div>
+                  <label style={{ display: 'block', color: '#d1d5db', fontWeight: 'bold', marginBottom: 6 }}>
+                    5. Tiêu đề thương hiệu Footer:
+                  </label>
+                  <input
+                    type="text"
+                    className={styles.loginInput}
+                    value={editedSiteInfo.footerTitle || ''}
+                    onChange={(e) => setEditedSiteInfo((prev) => ({ ...prev, footerTitle: e.target.value }))}
+                    placeholder="VD: CHUNGSUCLIENQUAN.COM"
+                    style={{ maxWidth: '100%' }}
+                  />
+                </div>
+
+                {/* Footer Subtitle */}
+                <div>
+                  <label style={{ display: 'block', color: '#d1d5db', fontWeight: 'bold', marginBottom: 6 }}>
+                    6. Slogan / Dòng phụ Footer:
+                  </label>
+                  <input
+                    type="text"
+                    className={styles.loginInput}
+                    value={editedSiteInfo.footerSubtitle || ''}
+                    onChange={(e) => setEditedSiteInfo((prev) => ({ ...prev, footerSubtitle: e.target.value }))}
+                    placeholder="VD: Hệ Thống Cày Tự Động Siêu Tốc"
+                    style={{ maxWidth: '100%' }}
+                  />
+                </div>
+              </div>
+
+              <div style={{ marginTop: 24 }}>
+                <button
+                  className={styles.saveBtn}
+                  onClick={handleSaveSiteInfo}
+                  disabled={loading}
+                  style={{ padding: '12px 32px', fontSize: 15 }}
+                >
+                  {loading ? '⏳ Đang lưu...' : '💾 Lưu Thay Đổi Tên Miền & Thương Hiệu'}
+                </button>
+              </div>
             </div>
           </div>
         )}

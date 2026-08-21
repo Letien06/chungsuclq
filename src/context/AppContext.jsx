@@ -142,8 +142,19 @@ export const AppProvider = ({ children }) => {
     closeModal();
   };
 
-  // Dynamic packages state
+  // Dynamic packages & siteInfo state
   const [packages, setPackages] = useState(PACKAGES);
+  const [siteInfo, setSiteInfo] = useState({
+    brandPrimary: 'CHUNGSUC',
+    brandAccent: 'LIENQUAN',
+    brandDomain: '.COM',
+    brandSubtitle: 'SỰ KIỆN CHUNG SỨC • UY TÍN • SIÊU TỐC',
+    footerTitle: 'CHUNGSUCLIENQUAN.COM',
+    footerSubtitle: 'Hệ Thống Cày Tự Động Siêu Tốc',
+    zaloUrl: 'https://zalo.me',
+    telegramUrl: 'https://t.me',
+    supportHotline: '0988.xxx.xxx',
+  });
 
   // Fetch dynamic packages and prices from backend
   useEffect(() => {
@@ -154,6 +165,9 @@ export const AppProvider = ({ children }) => {
           if (pkgList.length > 0) {
             setPackages(pkgList);
           }
+        }
+        if (data && data.siteInfo) {
+          setSiteInfo(data.siteInfo);
         }
       })
       .catch((err) => {
@@ -368,6 +382,7 @@ export const AppProvider = ({ children }) => {
         logout,
         topUpBalance,
         packages,
+        siteInfo,
         selectedPackageId,
         setSelectedPackageId,
         currentPackage,

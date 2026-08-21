@@ -4,7 +4,7 @@ import { Home, CreditCard, History, User, LogIn, LogOut, Plus, HelpCircle, Menu,
 import styles from './Header.module.css';
 
 export const Header = () => {
-  const { user, openModal, logout } = useApp();
+  const { user, openModal, logout, siteInfo } = useApp();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [userDropdownOpen, setUserDropdownOpen] = useState(false);
 
@@ -19,12 +19,12 @@ export const Header = () => {
             </div>
             <div className={styles.logoText}>
               <div className={styles.brandTitle}>
-                <span className={styles.brandPrimary}>CHUNGSUC</span>
-                <span className={styles.brandAccent}>LIENQUAN</span>
-                <span className={styles.brandDomain}>.COM</span>
+                <span className={styles.brandPrimary}>{siteInfo?.brandPrimary || 'CHUNGSUC'}</span>
+                <span className={styles.brandAccent}>{siteInfo?.brandAccent || 'LIENQUAN'}</span>
+                <span className={styles.brandDomain}>{siteInfo?.brandDomain || '.COM'}</span>
               </div>
               <div className={styles.brandSubtitle}>
-                SỰ KIỆN CHUNG SỨC • UY TÍN • SIÊU TỐC
+                {siteInfo?.brandSubtitle || 'SỰ KIỆN CHUNG SỨC • UY TÍN • SIÊU TỐC'}
               </div>
             </div>
           </div>

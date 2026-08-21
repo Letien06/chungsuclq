@@ -112,6 +112,19 @@ const config = {
     },
   },
 
+  // Branding & Site info
+  defaultSiteInfo: {
+    brandPrimary: 'CHUNGSUC',
+    brandAccent: 'LIENQUAN',
+    brandDomain: '.COM',
+    brandSubtitle: 'SỰ KIỆN CHUNG SỨC • UY TÍN • SIÊU TỐC',
+    footerTitle: 'CHUNGSUCLIENQUAN.COM',
+    footerSubtitle: 'Hệ Thống Cày Tự Động Siêu Tốc',
+    zaloUrl: 'https://zalo.me',
+    telegramUrl: 'https://t.me',
+    supportHotline: '0988.xxx.xxx',
+  },
+
   // Admin
   adminPassword: process.env.ADMIN_PASSWORD || 'tien3006',
 
