@@ -142,8 +142,27 @@ export const AppProvider = ({ children }) => {
     closeModal();
   };
 
+  // Dynamic packages state
+  const [packages, setPackages] = useState(PACKAGES);
+
+  // Fetch dynamic packages and prices from backend
+  useEffect(() => {
+    api.getSettings()
+      .then((data) => {
+        if (data && data.packages) {
+          const pkgList = Object.values(data.packages);
+          if (pkgList.length > 0) {
+            setPackages(pkgList);
+          }
+        }
+      })
+      .catch((err) => {
+        console.warn('Could not load dynamic settings, using default packages:', err);
+      });
+  }, []);
+
   // Selected package object
-  const currentPackage = PACKAGES.find((p) => p.id === selectedPackageId) || PACKAGES[0];
+  const currentPackage = packages.find((p) => p.id === selectedPackageId) || packages[0] || PACKAGES[0];
 
   // Bulk codes count
   const parsedBulkCodes = bulkCodesText
@@ -154,10 +173,10 @@ export const AppProvider = ({ children }) => {
   // Price calculations
   const effectiveQty = isBulk ? Math.max(1, parsedBulkCodes.length || 1) : quantity;
   const isMember = Boolean(user);
-  const unitPrice = isMember ? currentPackage.memberPrice : currentPackage.price;
-  const originalTotalPrice = currentPackage.price * effectiveQty;
+  const unitPrice = isMember ? (currentPackage.memberPrice ?? currentPackage.price ?? 0) : (currentPackage.price ?? 0);
+  const originalTotalPrice = (currentPackage.price ?? 0) * effectiveQty;
   const totalPrice = unitPrice * effectiveQty;
-  const totalBi = currentPackage.bi * effectiveQty;
+  const totalBi = (currentPackage.bi ?? currentPackage.totalBi ?? 25) * effectiveQty;
   const discountAmount = originalTotalPrice - totalPrice;
 
   // Modals management
@@ -348,7 +367,7 @@ export const AppProvider = ({ children }) => {
         loginWithGoogle,
         logout,
         topUpBalance,
-        packages: PACKAGES,
+        packages,
         selectedPackageId,
         setSelectedPackageId,
         currentPackage,

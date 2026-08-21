@@ -36,17 +36,31 @@ export function AdminPage() {
   // Active tab
   const [activeTab, setActiveTab] = useState('dashboard');
 
+  const [isLoggingIn, setIsLoggingIn] = useState(false);
+
   // Login
   const handleLogin = async () => {
+    if (!password.trim()) {
+      setAuthError('Vui lòng nhập mật khẩu admin!');
+      return;
+    }
     setAuthError('');
-    localStorage.setItem('cslq_admin_password', password);
+    setIsLoggingIn(true);
+    localStorage.setItem('cslq_admin_password', password.trim());
     try {
       const data = await api.getAdminStats();
       setStats(data);
       setIsAuthed(true);
     } catch (err) {
-      setAuthError('Sai mật khẩu admin!');
+      console.error('Admin login error:', err);
+      if (err.message && err.message.includes('401')) {
+        setAuthError('❌ Sai mật khẩu admin! Mật khẩu là: tien3006');
+      } else {
+        setAuthError(`❌ ${err.message || 'Lỗi kết nối máy chủ'}. (Máy chủ Render đang kết nối, vui lòng thử lại sau vài giây).`);
+      }
       localStorage.removeItem('cslq_admin_password');
+    } finally {
+      setIsLoggingIn(false);
     }
   };
 
@@ -201,8 +215,8 @@ export function AdminPage() {
             autoFocus
           />
           {authError && <div className={styles.authError}>{authError}</div>}
-          <button className={styles.loginBtn} onClick={handleLogin}>
-            Đăng nhập
+          <button className={styles.loginBtn} onClick={handleLogin} disabled={isLoggingIn}>
+            {isLoggingIn ? '⏳ Đang xác thực...' : 'Đăng nhập'}
           </button>
         </div>
       </div>
@@ -620,15 +634,49 @@ export function AdminPage() {
         {/* ========== SETTINGS ========== */}
         {activeTab === 'settings' && (
           <div>
-            <h2 className={styles.sectionTitle}>⚙️ Cấu hình gói dịch vụ</h2>
-            <p className={styles.settingsHint}>
-              Chỉnh số lượng ACC cần thiết cho mỗi gói. Thay đổi khi sự kiện mới có điều chỉnh.
-            </p>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+              <div>
+                <h2 className={styles.sectionTitle} style={{ margin: 0 }}>⚙️ Cấu Hình & Giá Gói Dịch Vụ</h2>
+                <p className={styles.settingsHint} style={{ margin: '4px 0 0 0' }}>
+                  Chỉnh sửa giá tiền, giá thành viên, số lượng ACC và nhãn của tất cả các gói hiển thị cho khách hàng.
+                </p>
+              </div>
+              <div className={styles.settingsActions}>
+                {settingsEditing ? (
+                  <>
+                    <button className={styles.saveBtn} onClick={handleSaveSettings} disabled={loading}>
+                      💾 Lưu Tất Cả Thay Đổi
+                    </button>
+                    <button
+                      className={styles.cancelBtn}
+                      onClick={() => {
+                        setSettingsEditing(false);
+                        setEditedSettings(settings?.packages || {});
+                      }}
+                    >
+                      ❌ Hủy
+                    </button>
+                  </>
+                ) : (
+                  <button className={styles.editBtn} onClick={() => setSettingsEditing(true)}>
+                    ✏️ Chỉnh Sửa Giá & Cấu Hình
+                  </button>
+                )}
+              </div>
+            </div>
 
             <div className={styles.settingsCards}>
               {Object.entries(editedSettings).map(([id, pkg]) => (
                 <div key={id} className={styles.settingsCard}>
-                  <h3 className={styles.pkgName}>{pkg.name || id}</h3>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+                    <h3 className={styles.pkgName} style={{ margin: 0 }}>{pkg.name || id}</h3>
+                    {pkg.badge && (
+                      <span style={{ background: '#eab308', color: '#000', fontSize: 11, fontWeight: 'bold', padding: '2px 8px', borderRadius: 12 }}>
+                        {pkg.badge}
+                      </span>
+                    )}
+                  </div>
+
                   <div className={styles.settingsRow}>
                     <label>Tên gói:</label>
                     <input
@@ -643,51 +691,131 @@ export function AdminPage() {
                       disabled={!settingsEditing}
                     />
                   </div>
+
                   <div className={styles.settingsRow}>
-                    <label>Số ACC cần:</label>
+                    <label style={{ color: '#fbbf24', fontWeight: 'bold' }}>💵 Giá gốc (đ):</label>
                     <input
                       type="number"
-                      min={1}
-                      value={pkg.accRequired || 0}
+                      step={1000}
+                      value={pkg.price ?? 0}
                       onChange={(e) =>
                         setEditedSettings((prev) => ({
                           ...prev,
-                          [id]: { ...prev[id], accRequired: parseInt(e.target.value) || 0 },
+                          [id]: { ...prev[id], price: Number(e.target.value) },
                         }))
                       }
                       disabled={!settingsEditing}
                     />
                   </div>
+
+                  <div className={styles.settingsRow}>
+                    <label style={{ color: '#34d399', fontWeight: 'bold' }}>👑 Giá VIP (đ):</label>
+                    <input
+                      type="number"
+                      step={1000}
+                      value={pkg.memberPrice ?? 0}
+                      onChange={(e) =>
+                        setEditedSettings((prev) => ({
+                          ...prev,
+                          [id]: { ...prev[id], memberPrice: Number(e.target.value) },
+                        }))
+                      }
+                      disabled={!settingsEditing}
+                    />
+                  </div>
+
+                  <div className={styles.settingsRow}>
+                    <label>👥 Số ACC cần:</label>
+                    <input
+                      type="number"
+                      min={1}
+                      value={pkg.accRequired || 0}
+                      onChange={(e) => {
+                        const accReq = parseInt(e.target.value) || 0;
+                        const biAcc = pkg.biPerAcc || 25;
+                        setEditedSettings((prev) => ({
+                          ...prev,
+                          [id]: {
+                            ...prev[id],
+                            accRequired: accReq,
+                            totalBi: accReq * biAcc,
+                            bi: accReq * biAcc,
+                          },
+                        }));
+                      }}
+                      disabled={!settingsEditing}
+                    />
+                  </div>
+
                   <div className={styles.settingsRow}>
                     <label>Bỉ/ACC:</label>
                     <input
                       type="number"
                       min={1}
-                      value={pkg.biPerAcc || 0}
+                      value={pkg.biPerAcc || 25}
+                      onChange={(e) => {
+                        const biAcc = parseInt(e.target.value) || 0;
+                        const accReq = pkg.accRequired || 1;
+                        setEditedSettings((prev) => ({
+                          ...prev,
+                          [id]: {
+                            ...prev[id],
+                            biPerAcc: biAcc,
+                            totalBi: accReq * biAcc,
+                            bi: accReq * biAcc,
+                          },
+                        }));
+                      }}
+                      disabled={!settingsEditing}
+                    />
+                  </div>
+
+                  <div className={styles.settingsRow}>
+                    <label>🏷️ Nhãn (Badge):</label>
+                    <input
+                      type="text"
+                      value={pkg.badge || ''}
+                      placeholder="ƯU TIÊN, VIP, HOT..."
                       onChange={(e) =>
                         setEditedSettings((prev) => ({
                           ...prev,
-                          [id]: { ...prev[id], biPerAcc: parseInt(e.target.value) || 0 },
+                          [id]: { ...prev[id], badge: e.target.value },
                         }))
                       }
                       disabled={!settingsEditing}
                     />
                   </div>
+
                   <div className={styles.settingsRow}>
-                    <label>Tổng Bỉ:</label>
+                    <label>📝 Mô tả:</label>
+                    <input
+                      type="text"
+                      value={pkg.description || ''}
+                      onChange={(e) =>
+                        setEditedSettings((prev) => ({
+                          ...prev,
+                          [id]: { ...prev[id], description: e.target.value },
+                        }))
+                      }
+                      disabled={!settingsEditing}
+                    />
+                  </div>
+
+                  <div className={styles.settingsRow} style={{ borderTop: '1px solid rgba(255,255,255,0.06)', paddingTop: 8, marginTop: 8 }}>
+                    <label style={{ fontWeight: 'bold' }}>⭐ Tổng Bỉ:</label>
                     <span className={styles.calcBi}>
-                      {(pkg.accRequired || 0) * (pkg.biPerAcc || 0)} Bỉ
+                      {(pkg.accRequired || 0) * (pkg.biPerAcc || 25)} Bỉ
                     </span>
                   </div>
                 </div>
               ))}
             </div>
 
-            <div className={styles.settingsActions}>
+            <div className={styles.settingsActions} style={{ marginTop: 20 }}>
               {settingsEditing ? (
                 <>
                   <button className={styles.saveBtn} onClick={handleSaveSettings} disabled={loading}>
-                    💾 Lưu thay đổi
+                    💾 Lưu Tất Cả Thay Đổi
                   </button>
                   <button
                     className={styles.cancelBtn}
@@ -701,7 +829,7 @@ export function AdminPage() {
                 </>
               ) : (
                 <button className={styles.editBtn} onClick={() => setSettingsEditing(true)}>
-                  ✏️ Chỉnh sửa
+                  ✏️ Chỉnh Sửa Giá & Cấu Hình
                 </button>
               )}
             </div>

@@ -50,13 +50,18 @@ router.put('/', async (req, res) => {
 
     // Validate each package
     for (const [id, pkg] of Object.entries(packages)) {
-      if (!pkg.name || !pkg.accRequired || !pkg.biPerAcc) {
+      if (!pkg.name) {
         return res.status(400).json({
-          error: `Invalid package ${id}: requires name, accRequired, biPerAcc`,
+          error: `Invalid package ${id}: requires name`,
         });
       }
-      pkg.totalBi = pkg.accRequired * pkg.biPerAcc;
       pkg.id = id;
+      pkg.price = Number(pkg.price) >= 0 ? Number(pkg.price) : 0;
+      pkg.memberPrice = Number(pkg.memberPrice) >= 0 ? Number(pkg.memberPrice) : 0;
+      pkg.accRequired = parseInt(pkg.accRequired) || 1;
+      pkg.biPerAcc = parseInt(pkg.biPerAcc) || 25;
+      pkg.totalBi = parseInt(pkg.totalBi) || (pkg.accRequired * pkg.biPerAcc);
+      pkg.bi = pkg.totalBi;
     }
 
     const db = getFirestore();
