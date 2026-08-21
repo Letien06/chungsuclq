@@ -1,0 +1,19 @@
+services:
+  - type: web
+    name: chungsuclq-backend
+    runtime: node
+    region: singapore
+    plan: free
+    buildCommand: cd backend && npm install
+    startCommand: cd backend && npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: FIREBASE_PROJECT_ID
+        value: chungsuclq-auto
+      - key: ADMIN_PASSWORD
+        value: changeme123
+      - key: CORS_ORIGIN
+        value: https://chungsuclq.vercel.app
+      - key: FIREBASE_SERVICE_ACCOUNT
+        sync: false

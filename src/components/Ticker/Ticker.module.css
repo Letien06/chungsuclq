@@ -1,0 +1,176 @@
+.tickerWrapper {
+  background: #080c14;
+  border-top: 1px solid #1a2335;
+  border-bottom: 2px solid #ff6a00;
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+  height: 42px;
+  position: relative;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+  user-select: none;
+}
+
+/* Left Fixed Time/Icon Badge */
+.leftFixedBadge {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #0d1320;
+  padding: 0 14px;
+  height: 100%;
+  border-right: 1px solid #1c283f;
+  z-index: 10;
+  color: #94a3b8;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.megaIcon {
+  color: #ff6a00;
+  animation: pulseSlow 1.5s infinite ease-in-out;
+}
+
+.timeStr {
+  color: #94a3b8;
+  font-family: monospace;
+  font-size: 13px;
+}
+
+.pipe {
+  color: #334155;
+  margin-left: 6px;
+  font-weight: 300;
+}
+
+/* Marquee Outer Container */
+.marqueeContainer {
+  flex: 1;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  position: relative;
+  height: 100%;
+}
+
+/* Marquee Track Container */
+.marqueeTrack {
+  display: flex;
+  width: max-content;
+  align-items: center;
+  animation: marqueeContinuous 38s linear infinite;
+  will-change: transform;
+}
+
+.marqueeTrack:hover {
+  animation-play-state: paused;
+}
+
+/* Continuous 0% to -50% translation without any jump */
+@keyframes marqueeContinuous {
+  0% {
+    transform: translate3d(0, 0, 0);
+  }
+  100% {
+    transform: translate3d(-50%, 0, 0);
+  }
+}
+
+/* Each Group containing items */
+.marqueeGroup {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+  gap: 16px;
+  padding-right: 16px;
+}
+
+.tickerCard {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  white-space: nowrap;
+}
+
+/* User */
+.userTag {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: #00d2ff;
+  font-weight: 700;
+}
+
+.userIcon {
+  color: #00d2ff;
+}
+
+.userName {
+  color: #00d2ff;
+}
+
+.dot {
+  color: #475569;
+  font-size: 11px;
+}
+
+/* Package Name */
+.packageTag {
+  color: #d8b4fe;
+  font-weight: 800;
+  letter-spacing: 0.3px;
+}
+
+/* Code */
+.codeTag {
+  background: rgba(244, 63, 94, 0.15);
+  color: #fb7185;
+  border: 1px solid rgba(244, 63, 94, 0.3);
+  padding: 1px 6px;
+  border-radius: 4px;
+  font-family: monospace;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+/* Bi */
+.biTag {
+  color: #cbd5e1;
+  font-weight: 600;
+}
+
+/* Status */
+.statusBadge {
+  color: #10b981;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  font-size: 12px;
+}
+
+/* Price */
+.priceTag {
+  color: #facc15;
+  font-family: var(--font-game);
+  font-weight: 800;
+  font-size: 14px;
+}
+
+/* Time */
+.timeTag {
+  color: #64748b;
+  font-size: 12px;
+}
+
+@media (max-width: 768px) {
+  .leftFixedBadge {
+    padding: 0 8px;
+  }
+  .timeStr {
+    display: none;
+  }
+  .marqueeTrack {
+    animation-duration: 25s;
+  }
+}

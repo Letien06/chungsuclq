@@ -1,0 +1,57 @@
+.section {
+  margin-bottom: 24px;
+}
+
+.sectionHeader {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.sectionTitleBox {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.stepNumber {
+  font-family: var(--font-game);
+  color: var(--accent-orange);
+  font-size: 16px;
+  font-weight: 800;
+}
+
+.sectionTitle {
+  font-family: var(--font-game);
+  font-size: 16px;
+  font-weight: 800;
+  color: var(--accent-orange);
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+.requiredStar {
+  color: #ef4444;
+  font-size: 16px;
+  font-weight: 800;
+}
+
+.sectionSubtitle {
+  font-size: 12px;
+  color: #64748b;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
+
+@media (max-width: 640px) {
+  .grid {
+    grid-template-columns: 1fr;
+  }
+}

@@ -1,0 +1,143 @@
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.75);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 999;
+  padding: 16px;
+  animation: fadeIn 0.2s ease;
+}
+
+.modal {
+  background: #111827;
+  border: 1.5px solid #25334c;
+  border-radius: var(--radius-lg);
+  width: 100%;
+  max-width: 500px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.7);
+  position: relative;
+  overflow: hidden;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  animation: modalPop 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.closeBtn {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  background: #1c273d;
+  color: #94a3b8;
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.closeBtn:hover {
+  background: var(--accent-red);
+  color: #fff;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding-right: 32px;
+}
+
+.headerIcon {
+  color: var(--accent-orange);
+}
+
+.title {
+  font-family: var(--font-game);
+  font-size: 18px;
+  font-weight: 800;
+  color: #fff;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+.stepsList {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.stepCard {
+  display: flex;
+  gap: 12px;
+  background: #0d1422;
+  border: 1px solid #1f2d45;
+  border-radius: var(--radius-md);
+  padding: 12px 14px;
+}
+
+.stepNumber {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--gradient-primary);
+  color: #fff;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  flex-shrink: 0;
+}
+
+.stepContent h4 {
+  font-size: 13px;
+  color: #fff;
+  font-weight: 700;
+  margin-bottom: 2px;
+}
+
+.stepContent p {
+  font-size: 12px;
+  color: #94a3b8;
+  line-height: 1.4;
+}
+
+.stepContent code {
+  background: #162238;
+  color: #38bdf8;
+  padding: 1px 4px;
+  border-radius: 3px;
+  font-family: monospace;
+}
+
+.footerNote {
+  background: rgba(16, 185, 129, 0.08);
+  border: 1px solid rgba(16, 185, 129, 0.25);
+  color: #6ee7b7;
+  font-size: 12px;
+  padding: 10px 12px;
+  border-radius: var(--radius-sm);
+  line-height: 1.5;
+}
+
+.doneBtn {
+  background: var(--gradient-primary);
+  color: #fff;
+  font-family: var(--font-game);
+  font-size: 15px;
+  font-weight: 800;
+  padding: 12px;
+  border-radius: var(--radius-md);
+}
+
+.doneBtn:hover {
+  filter: brightness(1.1);
+}

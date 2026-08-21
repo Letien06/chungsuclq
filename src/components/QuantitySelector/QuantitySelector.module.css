@@ -1,0 +1,175 @@
+.section {
+  margin-bottom: 24px;
+}
+
+.sectionTitleBox {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 12px;
+}
+
+.stepNumber {
+  font-family: var(--font-game);
+  color: var(--accent-orange);
+  font-size: 16px;
+  font-weight: 800;
+}
+
+.sectionTitle {
+  font-family: var(--font-game);
+  font-size: 16px;
+  font-weight: 800;
+  color: var(--accent-orange);
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+.requiredStar {
+  color: #ef4444;
+  font-size: 16px;
+  font-weight: 800;
+}
+
+.container {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+/* Counter Box */
+.counterBox {
+  display: flex;
+  align-items: center;
+  background: #0e1420;
+  border: 1.5px solid #202d44;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  height: 48px;
+}
+
+.disabledCounter {
+  opacity: 0.6;
+}
+
+.counterBtn {
+  width: 44px;
+  height: 100%;
+  background: #151e30;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s ease;
+}
+
+.counterBtn:hover:not(:disabled) {
+  background: var(--accent-orange);
+  color: #fff;
+}
+
+.counterBtn:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+.counterInput {
+  width: 56px;
+  height: 100%;
+  background: transparent;
+  border: none;
+  color: #fff;
+  font-family: var(--font-game);
+  font-size: 18px;
+  font-weight: 800;
+  text-align: center;
+  -moz-appearance: textfield;
+}
+
+.counterInput::-webkit-outer-spin-button,
+.counterInput::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+/* Info Display */
+.infoBox {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.infoRow {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: #94a3b8;
+}
+
+.infoLabel {
+  color: #94a3b8;
+}
+
+.priceHighlight {
+  font-family: var(--font-game);
+  font-size: 15px;
+  font-weight: 800;
+  color: var(--accent-orange);
+}
+
+.biHighlight {
+  font-family: var(--font-game);
+  font-size: 15px;
+  font-weight: 800;
+  color: #38bdf8;
+}
+
+/* Quick Select Pills */
+.quickPills {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-left: auto;
+}
+
+.pillBtn {
+  background: #131b2b;
+  border: 1px solid #223048;
+  color: #94a3b8;
+  font-family: var(--font-game);
+  font-size: 13px;
+  font-weight: 700;
+  padding: 6px 12px;
+  border-radius: var(--radius-sm);
+  transition: all 0.15s ease;
+}
+
+.pillBtn:hover {
+  background: #1c273d;
+  color: #fff;
+  border-color: var(--accent-orange);
+}
+
+.pillActive {
+  background: rgba(255, 106, 0, 0.15);
+  border-color: var(--accent-orange);
+  color: var(--accent-orange);
+}
+
+.bulkNote {
+  font-size: 12px;
+  color: #38bdf8;
+  margin-top: 8px;
+}
+
+@media (max-width: 600px) {
+  .container {
+    gap: 12px;
+  }
+  .quickPills {
+    margin-left: 0;
+    width: 100%;
+  }
+}

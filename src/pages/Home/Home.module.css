@@ -1,0 +1,237 @@
+.main {
+  min-height: calc(100vh - 200px);
+  padding: 24px 0 40px 0;
+}
+
+.container {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0 16px;
+}
+
+.layoutGrid {
+  display: grid;
+  grid-template-columns: 1fr 380px;
+  gap: 28px;
+  align-items: start;
+}
+
+.leftColumn {
+  display: flex;
+  flex-direction: column;
+}
+
+.rightColumn {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* Reviews Section */
+.reviewsSection {
+  background: #0e1422;
+  border: 1px solid #1f2d44;
+  border-radius: var(--radius-lg);
+  padding: 20px;
+  margin-top: 12px;
+  margin-bottom: 24px;
+}
+
+.sectionHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.sectionTitleBox {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.reviewIcon {
+  color: var(--accent-gold);
+}
+
+.sectionTitle {
+  font-family: var(--font-game);
+  font-size: 16px;
+  font-weight: 800;
+  color: #fff;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+.ratingOverview {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: #94a3b8;
+}
+
+.stars {
+  display: flex;
+  gap: 2px;
+}
+
+.reviewsGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+
+.reviewCard {
+  background: #121927;
+  border: 1px solid #1a2538;
+  border-radius: var(--radius-md);
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.reviewTop {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.reviewUser {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.reviewName {
+  font-size: 12px;
+  font-weight: 700;
+  color: #fff;
+}
+
+.rankBadge {
+  background: rgba(255, 106, 0, 0.15);
+  color: var(--accent-orange);
+  font-size: 9px;
+  font-weight: 800;
+  padding: 1px 5px;
+  border-radius: 3px;
+}
+
+.reviewTime {
+  font-size: 10px;
+  color: #64748b;
+}
+
+.reviewStars {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  flex-wrap: wrap;
+}
+
+.reviewPackageTag {
+  font-size: 10px;
+  font-weight: 700;
+  color: #38bdf8;
+  margin-left: 4px;
+}
+
+.reviewText {
+  font-size: 12px;
+  color: #cbd5e1;
+  line-height: 1.4;
+  font-style: italic;
+}
+
+/* FAQ Section */
+.faqSection {
+  background: #0e1422;
+  border: 1px solid #1f2d44;
+  border-radius: var(--radius-lg);
+  padding: 20px;
+  margin-bottom: 24px;
+}
+
+.faqHeader {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.faqIcon {
+  color: var(--accent-orange);
+}
+
+.faqTitle {
+  font-family: var(--font-game);
+  font-size: 16px;
+  font-weight: 800;
+  color: #fff;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+.accordion {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.accordionItem {
+  background: #121927;
+  border: 1px solid #1d293d;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  transition: all 0.2s ease;
+}
+
+.accordionHeader {
+  width: 100%;
+  padding: 14px 16px;
+  background: transparent;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  color: #f1f5f9;
+  text-align: left;
+  font-size: 14px;
+  font-weight: 600;
+  gap: 12px;
+}
+
+.accordionHeader:hover {
+  background: rgba(255, 106, 0, 0.05);
+  color: var(--accent-orange);
+}
+
+.questionText {
+  flex: 1;
+}
+
+.accordionBody {
+  padding: 0 16px 14px 16px;
+  font-size: 13px;
+  color: #94a3b8;
+  line-height: 1.5;
+  border-top: 1px solid #1a253a;
+  padding-top: 10px;
+  animation: fadeIn 0.2s ease;
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+  .layoutGrid {
+    grid-template-columns: 1fr;
+  }
+  .rightColumn {
+    order: -1; /* Place summary after forms or on top on medium screens */
+  }
+  .reviewsGrid {
+    grid-template-columns: 1fr;
+  }
+}

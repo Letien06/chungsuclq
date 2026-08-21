@@ -1,0 +1,64 @@
+.section {
+  margin-bottom: 24px;
+}
+
+.titleBox {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 12px;
+}
+
+.stepNumber {
+  font-family: var(--font-game);
+  color: var(--accent-orange);
+  font-size: 16px;
+  font-weight: 800;
+}
+
+.sectionTitle {
+  font-family: var(--font-game);
+  font-size: 16px;
+  font-weight: 800;
+  color: var(--accent-orange);
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+.container {
+  background: #0e1420;
+  border: 1.5px solid #202d44;
+  border-radius: var(--radius-md);
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  transition: all 0.2s ease;
+}
+
+.container:focus-within {
+  border-color: var(--accent-orange);
+  box-shadow: 0 0 16px rgba(255, 106, 0, 0.25);
+  background: #121927;
+}
+
+.textarea {
+  width: 100%;
+  background: transparent;
+  border: none;
+  color: #fff;
+  font-size: 14px;
+  resize: vertical;
+  min-height: 60px;
+}
+
+.textarea::placeholder {
+  color: #475569;
+}
+
+.counter {
+  align-self: flex-end;
+  font-size: 11px;
+  color: #64748b;
+  margin-top: 4px;
+}

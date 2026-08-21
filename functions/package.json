@@ -1,0 +1,31 @@
+{
+  "name": "chungsuclq-functions",
+  "version": "1.0.0",
+  "description": "Backend automation for Chung Suc Lien Quan",
+  "main": "src/index.js",
+  "engines": {
+    "node": "20"
+  },
+  "scripts": {
+    "serve": "firebase emulators:start --only functions",
+    "shell": "firebase functions:shell",
+    "start": "npm run shell",
+    "deploy": "firebase deploy --only functions",
+    "logs": "firebase functions:log",
+    "test": "node --test src/**/*.test.js"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.21.0",
+    "firebase-admin": "^12.6.0",
+    "firebase-functions": "^6.1.0",
+    "puppeteer": "^23.5.0",
+    "puppeteer-extra": "^3.3.6",
+    "puppeteer-extra-plugin-stealth": "^2.11.2",
+    "uuid": "^11.0.0"
+  },
+  "devDependencies": {
+    "firebase-functions-test": "^3.3.0"
+  },
+  "private": true
+}

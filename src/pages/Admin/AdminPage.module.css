@@ -1,0 +1,653 @@
+/* ============================
+   Admin Panel Styles
+   ============================ */
+
+/* Login Screen */
+.loginContainer {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #0a0f1a 0%, #111827 50%, #0a0f1a 100%);
+  padding: 20px;
+}
+
+.loginBox {
+  background: rgba(17, 24, 39, 0.95);
+  border: 1px solid rgba(234, 179, 8, 0.3);
+  border-radius: 16px;
+  padding: 48px 40px;
+  text-align: center;
+  max-width: 420px;
+  width: 100%;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+}
+
+.loginIcon {
+  font-size: 48px;
+  margin-bottom: 16px;
+}
+
+.loginBox h2 {
+  color: #eab308;
+  font-size: 28px;
+  font-weight: 800;
+  margin-bottom: 8px;
+  font-family: 'Times New Roman', serif;
+}
+
+.loginBox p {
+  color: #9ca3af;
+  font-size: 14px;
+  margin-bottom: 24px;
+}
+
+.loginInput {
+  width: 100%;
+  padding: 14px 16px;
+  background: rgba(0, 0, 0, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 10px;
+  color: #fff;
+  font-size: 16px;
+  outline: none;
+  transition: border-color 0.2s;
+  margin-bottom: 12px;
+}
+
+.loginInput:focus {
+  border-color: #eab308;
+}
+
+.authError {
+  color: #ef4444;
+  font-size: 13px;
+  margin-bottom: 12px;
+}
+
+.loginBtn {
+  width: 100%;
+  padding: 14px;
+  background: linear-gradient(135deg, #d97706, #f59e0b);
+  border: none;
+  border-radius: 10px;
+  color: #000;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+
+.loginBtn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 20px rgba(234, 179, 8, 0.4);
+}
+
+/* ============================
+   Main Admin Layout
+   ============================ */
+.admin {
+  min-height: 100vh;
+  background: #0a0f1a;
+  color: #e5e7eb;
+  font-family: 'Times New Roman', 'Be Vietnam Pro', sans-serif;
+}
+
+.adminHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 24px;
+  background: rgba(17, 24, 39, 0.95);
+  border-bottom: 1px solid rgba(234, 179, 8, 0.2);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  backdrop-filter: blur(12px);
+}
+
+.headerLeft {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.headerLogo {
+  width: 42px;
+  height: 42px;
+  border-radius: 8px;
+  border: 1.5px solid #eab308;
+  object-fit: cover;
+}
+
+.headerTitle {
+  font-size: 20px;
+  font-weight: 800;
+  color: #eab308;
+  letter-spacing: 1px;
+}
+
+.headerSub {
+  font-size: 12px;
+  color: #9ca3af;
+  margin-top: 2px;
+}
+
+.headerRight {
+  display: flex;
+  gap: 10px;
+}
+
+.refreshBtn,
+.logoutBtn {
+  padding: 8px 16px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  background: rgba(255, 255, 255, 0.05);
+  color: #d1d5db;
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.refreshBtn:hover {
+  border-color: #3b82f6;
+  color: #3b82f6;
+}
+
+.logoutBtn:hover {
+  border-color: #ef4444;
+  color: #ef4444;
+}
+
+/* Tabs */
+.tabs {
+  display: flex;
+  gap: 4px;
+  padding: 12px 24px 0;
+  background: rgba(17, 24, 39, 0.6);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  overflow-x: auto;
+}
+
+.tab {
+  padding: 10px 20px;
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid transparent;
+  color: #9ca3af;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+
+.tab:hover {
+  color: #e5e7eb;
+}
+
+.tabActive {
+  color: #eab308;
+  border-bottom-color: #eab308;
+}
+
+/* Content */
+.content {
+  padding: 24px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.sectionTitle {
+  font-size: 22px;
+  font-weight: 700;
+  color: #f3f4f6;
+  margin-bottom: 20px;
+}
+
+.subTitle {
+  font-size: 18px;
+  font-weight: 600;
+  color: #d1d5db;
+  margin: 28px 0 14px;
+}
+
+/* ============================
+   Stats Grid
+   ============================ */
+.statsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 14px;
+  margin-bottom: 16px;
+}
+
+.statCard {
+  background: rgba(17, 24, 39, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  padding: 20px 16px;
+  text-align: center;
+  transition: border-color 0.2s;
+}
+
+.statCard:hover {
+  border-color: rgba(255, 255, 255, 0.15);
+}
+
+.statIcon {
+  font-size: 28px;
+  margin-bottom: 8px;
+}
+
+.statValue {
+  font-size: 32px;
+  font-weight: 800;
+  color: #fff;
+  line-height: 1;
+  margin-bottom: 6px;
+}
+
+.statLabel {
+  font-size: 13px;
+  color: #9ca3af;
+}
+
+.statQueued { border-left: 3px solid #f59e0b; }
+.statProcessing { border-left: 3px solid #3b82f6; }
+.statCompleted { border-left: 3px solid #10b981; }
+.statFailed { border-left: 3px solid #ef4444; }
+
+/* Quick Actions */
+.quickActions {
+  display: flex;
+  gap: 12px;
+  margin-top: 24px;
+}
+
+.actionBtn {
+  padding: 12px 24px;
+  background: linear-gradient(135deg, #2563eb, #3b82f6);
+  border: none;
+  border-radius: 10px;
+  color: #fff;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+
+.actionBtn:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 20px rgba(59, 130, 246, 0.4);
+}
+
+.actionBtn:disabled,
+.actionBtnDanger:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.actionBtnDanger {
+  padding: 12px 24px;
+  background: linear-gradient(135deg, #dc2626, #ef4444);
+  border: none;
+  border-radius: 10px;
+  color: #fff;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.15s;
+}
+
+.actionBtnDanger:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 20px rgba(239, 68, 68, 0.4);
+}
+
+/* ============================
+   Orders Table
+   ============================ */
+.tableWrapper {
+  overflow-x: auto;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+.table thead {
+  background: rgba(17, 24, 39, 0.9);
+}
+
+.table th {
+  padding: 12px 16px;
+  text-align: left;
+  font-weight: 600;
+  color: #9ca3af;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  white-space: nowrap;
+}
+
+.table td {
+  padding: 12px 16px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+.table tbody tr:hover {
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.orderId {
+  font-family: monospace;
+  color: #eab308;
+  font-weight: 600;
+}
+
+.code {
+  font-family: monospace;
+  color: #67e8f9;
+  font-size: 13px;
+}
+
+.statusBadge {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #fff;
+}
+
+.timeCell {
+  font-size: 12px;
+  color: #9ca3af;
+  white-space: nowrap;
+}
+
+.emptyRow {
+  text-align: center;
+  color: #6b7280;
+  padding: 40px 16px !important;
+  font-style: italic;
+}
+
+/* ============================
+   Account Import
+   ============================ */
+.importSection {
+  background: rgba(17, 24, 39, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  padding: 24px;
+  margin-bottom: 20px;
+}
+
+.importHint {
+  color: #9ca3af;
+  font-size: 14px;
+  margin-bottom: 12px;
+}
+
+.importHint code {
+  background: rgba(234, 179, 8, 0.15);
+  color: #eab308;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 13px;
+}
+
+.importTextarea {
+  width: 100%;
+  min-height: 200px;
+  padding: 14px;
+  background: rgba(0, 0, 0, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 10px;
+  color: #e5e7eb;
+  font-family: monospace;
+  font-size: 13px;
+  resize: vertical;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.importTextarea:focus {
+  border-color: #eab308;
+}
+
+.importActions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 12px;
+}
+
+.accCount {
+  color: #9ca3af;
+  font-size: 14px;
+}
+
+.importBtn {
+  padding: 10px 24px;
+  background: linear-gradient(135deg, #059669, #10b981);
+  border: none;
+  border-radius: 8px;
+  color: #fff;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.15s;
+}
+
+.importBtn:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 16px rgba(16, 185, 129, 0.4);
+}
+
+.importBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.importSuccess {
+  margin-top: 12px;
+  padding: 10px 14px;
+  background: rgba(16, 185, 129, 0.15);
+  border: 1px solid rgba(16, 185, 129, 0.3);
+  border-radius: 8px;
+  color: #34d399;
+  font-size: 13px;
+}
+
+.importError {
+  margin-top: 12px;
+  padding: 10px 14px;
+  background: rgba(239, 68, 68, 0.15);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  border-radius: 8px;
+  color: #f87171;
+  font-size: 13px;
+}
+
+.accStats {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: 16px 20px;
+  background: rgba(17, 24, 39, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  flex-wrap: wrap;
+}
+
+.accStatItem {
+  font-size: 14px;
+  color: #9ca3af;
+}
+
+.accStatItem strong {
+  color: #e5e7eb;
+  margin-left: 4px;
+}
+
+.purgeBtnSmall {
+  margin-left: auto;
+  padding: 6px 14px;
+  background: rgba(239, 68, 68, 0.15);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  border-radius: 6px;
+  color: #f87171;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.purgeBtnSmall:hover {
+  background: rgba(239, 68, 68, 0.25);
+}
+
+/* ============================
+   Settings
+   ============================ */
+.settingsHint {
+  color: #9ca3af;
+  font-size: 14px;
+  margin-bottom: 20px;
+}
+
+.settingsCards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.settingsCard {
+  background: rgba(17, 24, 39, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  padding: 20px;
+}
+
+.pkgName {
+  font-size: 18px;
+  font-weight: 700;
+  color: #eab308;
+  margin-bottom: 16px;
+}
+
+.settingsRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.settingsRow label {
+  font-size: 14px;
+  color: #9ca3af;
+  min-width: 100px;
+}
+
+.settingsRow input {
+  width: 160px;
+  padding: 8px 12px;
+  background: rgba(0, 0, 0, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 6px;
+  color: #e5e7eb;
+  font-size: 14px;
+  outline: none;
+}
+
+.settingsRow input:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.settingsRow input:focus {
+  border-color: #eab308;
+}
+
+.calcBi {
+  font-size: 16px;
+  font-weight: 700;
+  color: #34d399;
+}
+
+.settingsActions {
+  display: flex;
+  gap: 12px;
+}
+
+.editBtn,
+.saveBtn,
+.cancelBtn {
+  padding: 10px 24px;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.15s;
+}
+
+.editBtn {
+  background: linear-gradient(135deg, #d97706, #f59e0b);
+  color: #000;
+}
+
+.saveBtn {
+  background: linear-gradient(135deg, #059669, #10b981);
+  color: #fff;
+}
+
+.cancelBtn {
+  background: rgba(255, 255, 255, 0.08);
+  color: #9ca3af;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.editBtn:hover,
+.saveBtn:hover:not(:disabled) {
+  transform: translateY(-1px);
+}
+
+/* ============================
+   Responsive
+   ============================ */
+@media (max-width: 768px) {
+  .adminHeader {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .headerRight {
+    width: 100%;
+    justify-content: flex-end;
+  }
+
+  .statsGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .settingsCards {
+    grid-template-columns: 1fr;
+  }
+
+  .content {
+    padding: 16px;
+  }
+
+  .tabs {
+    padding: 8px 16px 0;
+  }
+
+  .quickActions {
+    flex-direction: column;
+  }
+}

@@ -1,0 +1,234 @@
+.section {
+  margin-bottom: 24px;
+}
+
+.headerRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.titleBox {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.stepNumber {
+  font-family: var(--font-game);
+  color: var(--accent-orange);
+  font-size: 16px;
+  font-weight: 800;
+}
+
+.sectionTitle {
+  font-family: var(--font-game);
+  font-size: 16px;
+  font-weight: 800;
+  color: var(--accent-orange);
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+.requiredStar {
+  color: #ef4444;
+  font-size: 16px;
+  font-weight: 800;
+}
+
+/* Toggle Switch */
+.toggleWrapper {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.toggleLabel {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  color: #94a3b8;
+  transition: color 0.2s ease;
+}
+
+.toggleLabelActive {
+  color: #ffffff;
+}
+
+.switch {
+  width: 44px;
+  height: 24px;
+  background: #1e293b;
+  border: 1px solid #334155;
+  border-radius: var(--radius-full);
+  position: relative;
+  transition: all 0.25s ease;
+}
+
+.switchActive {
+  background: var(--accent-orange);
+  border-color: var(--accent-orange);
+  box-shadow: 0 0 12px rgba(255, 106, 0, 0.5);
+}
+
+.switchHandle {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 18px;
+  height: 18px;
+  background: #ffffff;
+  border-radius: 50%;
+  transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.switchActive .switchHandle {
+  transform: translateX(20px);
+}
+
+/* Single Input Container */
+.inputContainer {
+  display: flex;
+  align-items: center;
+  background: #0e1420;
+  border: 1.5px solid #202d44;
+  border-radius: var(--radius-md);
+  padding: 4px 6px 4px 14px;
+  transition: all 0.2s ease;
+}
+
+.inputContainer:focus-within {
+  border-color: var(--accent-orange);
+  box-shadow: 0 0 16px rgba(255, 106, 0, 0.25);
+  background: #121927;
+}
+
+.inputIconBox {
+  display: flex;
+  align-items: center;
+  color: #64748b;
+  margin-right: 12px;
+}
+
+.inputField {
+  flex: 1;
+  background: transparent;
+  border: none;
+  color: #ffffff;
+  font-size: 15px;
+  font-weight: 500;
+  padding: 10px 0;
+}
+
+.inputField::placeholder {
+  color: #475569;
+}
+
+.inputActions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.pasteBtn, .guideBtn {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 6px 10px;
+  border-radius: var(--radius-sm);
+  font-size: 12px;
+  font-weight: 600;
+  transition: all 0.15s ease;
+}
+
+.pasteBtn {
+  background: #1c273d;
+  color: #cbd5e1;
+  border: 1px solid #2e3e5c;
+}
+
+.pasteBtn:hover {
+  background: #253450;
+  color: #fff;
+  border-color: var(--accent-orange);
+}
+
+.guideBtn {
+  background: transparent;
+  color: var(--accent-orange);
+  border: 1px solid rgba(255, 106, 0, 0.3);
+}
+
+.guideBtn:hover {
+  background: rgba(255, 106, 0, 0.15);
+}
+
+/* Bulk Mode Container */
+.bulkContainer {
+  background: #0e1420;
+  border: 1.5px solid #202d44;
+  border-radius: var(--radius-md);
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.bulkContainer:focus-within {
+  border-color: var(--accent-orange);
+  box-shadow: 0 0 16px rgba(255, 106, 0, 0.25);
+}
+
+.bulkHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 13px;
+  color: #94a3b8;
+}
+
+.bulkInfo {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.bulkIcon {
+  color: var(--accent-orange);
+}
+
+.statsCount {
+  color: var(--accent-orange);
+  font-family: var(--font-game);
+  font-size: 16px;
+}
+
+.bulkTextarea {
+  width: 100%;
+  background: #090d15;
+  border: 1px solid #1c273d;
+  border-radius: var(--radius-sm);
+  color: #fff;
+  padding: 10px 12px;
+  font-family: monospace;
+  font-size: 14px;
+  resize: vertical;
+  line-height: 1.6;
+}
+
+.bulkTextarea::placeholder {
+  color: #475569;
+}
+
+.bulkFooter {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+}
