@@ -132,13 +132,15 @@ app.get('/api/site-info', async (_req, res) => {
 app.use('/api/accounts', adminAuth, require('./routes/accounts'));
 app.use('/api/settings', adminAuth, require('./routes/settings'));
 app.use('/api/admin/users', adminAuth, require('./routes/users'));
+// Compatibility alias for older admin builds that used the shorter path.
+app.use('/api/users', adminAuth, require('./routes/users'));
 
 // Health check
 app.get('/api/health', (req, res) => {
   res.json({
     status: 'ok',
     timestamp: new Date().toISOString(),
-    version: '1.0.0',
+    version: '1.0.1-users-route',
     project: process.env.FIREBASE_PROJECT_ID || 'chungsuclq-auto',
   });
 });
