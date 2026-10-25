@@ -12,12 +12,27 @@ import {
 
 const AppContext = createContext();
 
+// Browser storage can contain stale/truncated data (for example after a
+// deploy or an interrupted write). Never let one malformed localStorage
+// value crash the whole React tree; fall back to the safe default instead.
+const readStoredJson = (key, fallback = null) => {
+  try {
+    const value = localStorage.getItem(key);
+    if (!value) return fallback;
+    const parsed = JSON.parse(value);
+    return parsed ?? fallback;
+  } catch (error) {
+    console.warn(`[Storage] Ignoring invalid ${key} value`, error);
+    try { localStorage.removeItem(key); } catch (_) { /* storage may be unavailable */ }
+    return fallback;
+  }
+};
+
 export const AppProvider = ({ children }) => {
   // 1. Auth State
   const [user, setUser] = useState(() => {
-    const saved = localStorage.getItem('cslq_user');
-    if (!saved) return null;
-    const parsed = JSON.parse(saved);
+    const parsed = readStoredJson('cslq_user', null);
+    if (!parsed || typeof parsed !== 'object') return null;
     // Remove the old demo grant from browser sessions created before the
     // zero-balance policy. Verified top-ups are not stored in this client
     // object, so the legacy 250,000 value is never authoritative.
@@ -37,8 +52,8 @@ export const AppProvider = ({ children }) => {
 
   // 3. Order History State
   const [orderHistory, setOrderHistory] = useState(() => {
-    const saved = localStorage.getItem('cslq_orders');
-    return saved ? JSON.parse(saved) : SAMPLE_HISTORIES;
+    const saved = readStoredJson('cslq_orders', SAMPLE_HISTORIES);
+    return Array.isArray(saved) ? saved : SAMPLE_HISTORIES;
   });
 
   // 4. Modal States
@@ -98,7 +113,7 @@ export const AppProvider = ({ children }) => {
       const savedUser = localStorage.getItem('cslq_user_' + googleUser.uid);
       // A new Firebase account must start at zero. Credit is only changed by
       // a verified top-up/order flow; never grant a demo balance on sign-in.
-      const savedProfile = savedUser ? JSON.parse(savedUser) : null;
+      const savedProfile = readStoredJson('cslq_user_' + googleUser.uid, null);
       const existingBalance = savedProfile && Number(savedProfile.balance) !== 250000
         ? Number(savedProfile.balance || 0)
         : 0;
