@@ -175,7 +175,8 @@ export function AdminPage() {
       setEditedSettings(normalizedPackages);
       if (settingsData.siteInfo) {
         setSiteInfo(settingsData.siteInfo);
-        setEditedSiteInfo(settingsData.siteInfo);
+        // Keep newly added branding fields visible when loading older settings documents.
+        setEditedSiteInfo((prev) => ({ ...prev, ...settingsData.siteInfo }));
       }
       if (settingsData.paymentInfo) {
         const serverPaymentInfo = settingsData.paymentInfo;
