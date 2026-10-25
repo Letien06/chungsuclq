@@ -1,6 +1,6 @@
 .main {
   min-height: calc(100vh - 200px);
-  padding: 24px 0 40px;
+  padding: 30px 0 48px;
 }
 
 .container {
@@ -12,7 +12,7 @@
 .layoutGrid {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(320px, 380px);
-  gap: 28px;
+  gap: 32px;
   align-items: start;
 }
 
@@ -29,12 +29,13 @@
 
 /* Reviews Section */
 .reviewsSection {
-  background: #0e1422;
-  border: 1px solid #1f2d44;
-  border-radius: var(--radius-lg);
-  padding: 20px;
-  margin-top: 12px;
-  margin-bottom: 24px;
+  background: linear-gradient(145deg, rgba(18, 29, 48, 0.92), rgba(11, 17, 29, 0.96));
+  border: 1px solid #22334f;
+  border-radius: 16px;
+  padding: 22px;
+  margin-top: 16px;
+  margin-bottom: 28px;
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.18);
 }
 
 .sectionHeader {
@@ -57,11 +58,12 @@
 }
 
 .sectionTitle {
-  font-family: var(--font-game);
-  font-size: 16px;
+  font-family: var(--font-main);
+  font-size: 14px;
   font-weight: 800;
   color: #fff;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.03em;
+  line-height: 1.25;
   text-transform: uppercase;
 }
 
@@ -85,10 +87,10 @@
 }
 
 .reviewCard {
-  background: #121927;
-  border: 1px solid #1a2538;
-  border-radius: var(--radius-md);
-  padding: 12px 14px;
+  background: rgba(10, 17, 29, 0.62);
+  border: 1px solid #1f2d44;
+  border-radius: 12px;
+  padding: 14px;
   display: flex;
   flex-direction: column;
   gap: 8px;
@@ -143,17 +145,18 @@
 .reviewText {
   font-size: 12px;
   color: #cbd5e1;
-  line-height: 1.4;
+  line-height: 1.55;
   font-style: italic;
 }
 
 /* FAQ Section */
 .faqSection {
-  background: #0e1422;
-  border: 1px solid #1f2d44;
-  border-radius: var(--radius-lg);
-  padding: 20px;
-  margin-bottom: 24px;
+  background: linear-gradient(145deg, rgba(18, 29, 48, 0.92), rgba(11, 17, 29, 0.96));
+  border: 1px solid #22334f;
+  border-radius: 16px;
+  padding: 22px;
+  margin-bottom: 28px;
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.18);
 }
 
 .faqHeader {
@@ -168,11 +171,12 @@
 }
 
 .faqTitle {
-  font-family: var(--font-game);
-  font-size: 16px;
+  font-family: var(--font-main);
+  font-size: 14px;
   font-weight: 800;
   color: #fff;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.03em;
+  line-height: 1.25;
   text-transform: uppercase;
 }
 
@@ -183,9 +187,9 @@
 }
 
 .accordionItem {
-  background: #121927;
+  background: rgba(10, 17, 29, 0.62);
   border: 1px solid #1d293d;
-  border-radius: var(--radius-md);
+  border-radius: 12px;
   overflow: hidden;
   transition: all 0.2s ease;
 }
@@ -199,9 +203,10 @@
   justify-content: space-between;
   color: #f1f5f9;
   text-align: left;
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 600;
   gap: 12px;
+  line-height: 1.4;
 }
 
 .accordionHeader:hover {

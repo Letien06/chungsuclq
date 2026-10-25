@@ -11,13 +11,14 @@ export const PackageCard = ({ pkg, isSelected, onSelect }) => {
       aria-pressed={isSelected}
       aria-label={`${pkg.name}, ${pkg.price.toLocaleString('vi-VN')} đồng, ${pkg.bi} Vé nhảy`}
     >
-      {/* Top Badge */}
-      {pkg.badge && (
-        <div className={`${styles.badge} ${pkg.isPriority ? styles.priorityBadge : styles.normalBadge}`}>
-          {pkg.isPriority && <Flame size={12} />}
-          <span>{pkg.badge}</span>
-        </div>
-      )}
+      <div className={styles.cardMeta}>
+        {pkg.badge ? (
+          <div className={`${styles.badge} ${pkg.isPriority ? styles.priorityBadge : styles.normalBadge}`}>
+            {pkg.isPriority && <Flame size={12} />}
+            <span>{pkg.badge}</span>
+          </div>
+        ) : <span className={styles.badgeSpacer} aria-hidden="true" />}
+      </div>
 
       {/* Selected Indicator Checkmark */}
       {isSelected && (
@@ -41,6 +42,8 @@ export const PackageCard = ({ pkg, isSelected, onSelect }) => {
           <strong>{pkg.bi}</strong> Vé nhảy
         </span>
       </div>
+
+      <p className={styles.description}>{pkg.description}</p>
 
       {/* Speed & Boost Progress Bar */}
       <div className={styles.progressContainer}>

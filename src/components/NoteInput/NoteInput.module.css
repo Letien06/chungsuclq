@@ -1,5 +1,5 @@
 .section {
-  margin-bottom: 24px;
+  margin-bottom: 28px;
 }
 
 .titleBox {
@@ -29,18 +29,19 @@
 }
 
 .sectionTitle {
-  font-family: var(--font-game);
-  font-size: 16px;
+  font-family: var(--font-main);
+  font-size: 14px;
   font-weight: 800;
   color: var(--accent-orange);
-  letter-spacing: 0.5px;
+  letter-spacing: 0.03em;
+  line-height: 1.25;
   text-transform: uppercase;
 }
 
 .container {
-  background: #0e1420;
-  border: 1.5px solid #202d44;
-  border-radius: var(--radius-md);
+  background: linear-gradient(180deg, #111a2a, #0d1420);
+  border: 1px solid #243550;
+  border-radius: 12px;
   padding: 12px 14px;
   display: flex;
   flex-direction: column;
@@ -59,7 +60,8 @@
   background: transparent;
   border: none;
   color: #fff;
-  font-size: 14px;
+  font-size: 13px;
+  line-height: 1.5;
   resize: vertical;
   min-height: 60px;
 }

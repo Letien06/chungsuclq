@@ -1,14 +1,14 @@
 .section {
-  margin-bottom: 24px;
+  margin-bottom: 28px;
 }
 
 .sectionHeader {
   display: flex;
   align-items: baseline;
   justify-content: space-between;
-  margin-bottom: 12px;
+  margin-bottom: 13px;
   flex-wrap: wrap;
-  gap: 8px;
+  gap: 6px 14px;
 }
 
 .sectionTitleBox {
@@ -25,11 +25,11 @@
 }
 
 .sectionTitle {
-  font-family: var(--font-game);
-  font-size: 16px;
+  font-family: var(--font-main);
+  font-size: 14px;
   font-weight: 800;
   color: var(--accent-orange);
-  letter-spacing: 0.5px;
+  letter-spacing: 0.02em;
   text-transform: uppercase;
 }
 
@@ -40,27 +40,29 @@
 }
 
 .sectionSubtitle {
-  font-size: 12px;
+  font-size: 11px;
   color: #64748b;
+  line-height: 1.4;
 }
 
 .selectedService {
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 14px;
-  background: linear-gradient(135deg, rgba(255, 106, 0, 0.13), rgba(15, 23, 42, 0.9));
-  border: 1px solid rgba(255, 166, 0, 0.42);
-  border-radius: var(--radius-md);
+  padding: 15px 16px;
+  background: linear-gradient(110deg, rgba(255, 106, 0, 0.12), rgba(18, 28, 45, 0.92) 65%);
+  border: 1px solid rgba(255, 166, 0, 0.34);
+  border-radius: 14px;
   min-width: 0;
+  box-shadow: inset 0 1px rgba(255, 255, 255, 0.03);
 }
 
 .selectedIcon {
   display: grid;
   place-items: center;
-  width: 34px;
-  height: 34px;
-  flex: 0 0 34px;
+  width: 36px;
+  height: 36px;
+  flex: 0 0 36px;
   color: #111827;
   background: var(--accent-gold);
   border-radius: 50%;
@@ -75,22 +77,23 @@
 
 .selectedLabel, .modalEyebrow {
   color: var(--accent-gold);
-  font-size: 10px;
-  font-weight: 800;
-  letter-spacing: 0.12em;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
 }
 
 .selectedInfo strong {
   overflow: hidden;
   color: #fff;
-  font-size: 14px;
+  font-size: 15px;
+  line-height: 1.25;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
 .selectedInfo > span:last-child {
   color: #94a3b8;
-  font-size: 12px;
+  font-size: 11px;
 }
 
 .changeButton {
@@ -98,18 +101,19 @@
   align-items: center;
   gap: 4px;
   margin-left: auto;
-  padding: 8px 10px;
+  padding: 9px 11px;
   color: #fff;
   background: rgba(255, 255, 255, 0.08);
   border: 1px solid rgba(255, 255, 255, 0.13);
-  border-radius: 8px;
-  font-size: 12px;
+  border-radius: 9px;
+  font-size: 11px;
   font-weight: 700;
   white-space: nowrap;
   flex-shrink: 0;
 }
 
 .changeButton:hover { background: rgba(255, 106, 0, 0.2); }
+.changeButton:active { transform: scale(0.97); }
 
 .modalBackdrop {
   position: fixed;
@@ -126,10 +130,10 @@
   width: min(860px, 100%);
   max-height: min(760px, 90vh);
   overflow: auto;
-  padding: 22px;
-  background: #0e1422;
+  padding: 24px;
+  background: linear-gradient(155deg, #111c2f 0%, #0d1422 100%);
   border: 1px solid #2a3b57;
-  border-radius: 18px;
+  border-radius: 20px;
   box-shadow: 0 24px 80px rgba(0, 0, 0, 0.45);
 }
 
@@ -144,8 +148,10 @@
 .modalHeader h3 {
   margin: 5px 0 0;
   color: #fff;
-  font-family: var(--font-game);
-  font-size: 20px;
+  font-family: var(--font-main);
+  font-size: 18px;
+  font-weight: 750;
+  letter-spacing: -0.02em;
 }
 
 .closeButton {
@@ -162,7 +168,7 @@
 .modalGrid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 12px;
+  gap: 14px;
 }
 
 @media (max-width: 640px) {
