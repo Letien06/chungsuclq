@@ -78,6 +78,8 @@ export function AdminPage() {
     brandSubtitle: 'SỰ KIỆN CHUNG SỨC • UY TÍN • SIÊU TỐC',
     footerTitle: 'CHUNGSUCLIENQUAN.COM',
     footerSubtitle: 'Hệ Thống Cày Tự Động Siêu Tốc',
+    zaloUrl: 'https://zalo.me',
+    supportHotline: '0988.776.655',
   });
   const [editedPaymentInfo, setEditedPaymentInfo] = useState({
     ...BANK_PAYMENT_INFO,
@@ -856,6 +858,39 @@ export function AdminPage() {
                     placeholder="VD: Hệ Thống Cày Tự Động Siêu Tốc"
                     style={{ maxWidth: '100%' }}
                   />
+                </div>
+              </div>
+
+              {/* Zalo Support */}
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 20, marginTop: 20 }}>
+                <div>
+                  <label style={{ display: 'block', color: '#38bdf8', fontWeight: 'bold', marginBottom: 6 }}>
+                    7. Số Zalo CSKH:
+                  </label>
+                  <input
+                    type="tel"
+                    className={styles.loginInput}
+                    value={editedSiteInfo.supportHotline || ''}
+                    onChange={(e) => setEditedSiteInfo((prev) => ({ ...prev, supportHotline: e.target.value }))}
+                    placeholder="VD: 0988.776.655"
+                    style={{ maxWidth: '100%' }}
+                  />
+                  <span style={{ fontSize: 12, color: '#9ca3af' }}>Hiển thị trong Footer và nút liên hệ nổi</span>
+                </div>
+
+                <div>
+                  <label style={{ display: 'block', color: '#38bdf8', fontWeight: 'bold', marginBottom: 6 }}>
+                    8. URL Zalo CSKH:
+                  </label>
+                  <input
+                    type="url"
+                    className={styles.loginInput}
+                    value={editedSiteInfo.zaloUrl || ''}
+                    onChange={(e) => setEditedSiteInfo((prev) => ({ ...prev, zaloUrl: e.target.value }))}
+                    placeholder="https://zalo.me/..."
+                    style={{ maxWidth: '100%' }}
+                  />
+                  <span style={{ fontSize: 12, color: '#9ca3af' }}>Liên kết mở khi khách bấm Zalo CSKH</span>
                 </div>
               </div>
 

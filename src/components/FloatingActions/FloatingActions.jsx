@@ -4,7 +4,7 @@ import { MessageCircle, HelpCircle, ArrowUp } from 'lucide-react';
 import styles from './FloatingActions.module.css';
 
 export const FloatingActions = () => {
-  const { openModal } = useApp();
+  const { openModal, siteInfo } = useApp();
   const [showBackToTop, setShowBackToTop] = useState(false);
 
   useEffect(() => {
@@ -22,6 +22,12 @@ export const FloatingActions = () => {
   const scrollToTop = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
+
+  const supportHotline = siteInfo?.supportHotline || '';
+  const zaloDigits = supportHotline.replace(/\D/g, '');
+  const zaloUrl = siteInfo?.zaloUrl && siteInfo.zaloUrl !== 'https://zalo.me'
+    ? siteInfo.zaloUrl
+    : (zaloDigits.length >= 9 ? `https://zalo.me/${zaloDigits}` : 'https://zalo.me');
 
   return (
     <div className={styles.container}>
@@ -46,7 +52,7 @@ export const FloatingActions = () => {
       </button>
 
       <a
-        href="https://zalo.me"
+        href={zaloUrl}
         target="_blank"
         rel="noreferrer"
         className={`${styles.actionBtn} ${styles.zaloBtn}`}

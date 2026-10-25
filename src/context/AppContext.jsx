@@ -158,8 +158,7 @@ export const AppProvider = ({ children }) => {
     footerTitle: 'CHUNGSUCLIENQUAN.COM',
     footerSubtitle: 'Hệ Thống Cày Tự Động Siêu Tốc',
     zaloUrl: 'https://zalo.me',
-    telegramUrl: 'https://t.me',
-    supportHotline: '0988.xxx.xxx',
+    supportHotline: '0988.776.655',
   });
   const [paymentInfo, setPaymentInfo] = useState(BANK_PAYMENT_INFO);
 

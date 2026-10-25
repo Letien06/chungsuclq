@@ -1,6 +1,6 @@
 import React from 'react';
 import { useApp } from '../../context/AppContext';
-import { ShieldCheck, MessageCircle, Send, Heart, HelpCircle, FileText, Lock } from 'lucide-react';
+import { ShieldCheck, MessageCircle, Heart } from 'lucide-react';
 import styles from './Footer.module.css';
 
 export const Footer = () => {
@@ -9,6 +9,11 @@ export const Footer = () => {
   const brandFullName = siteInfo
     ? `${siteInfo.brandPrimary || 'CHUNGSUC'}${siteInfo.brandAccent || 'LIENQUAN'}${siteInfo.brandDomain || '.COM'}`
     : 'CHUNGSUCLIENQUAN.COM';
+  const supportHotline = siteInfo?.supportHotline || '0988.776.655';
+  const zaloDigits = supportHotline.replace(/\D/g, '');
+  const zaloUrl = siteInfo?.zaloUrl && siteInfo.zaloUrl !== 'https://zalo.me'
+    ? siteInfo.zaloUrl
+    : (zaloDigits.length >= 9 ? `https://zalo.me/${zaloDigits}` : 'https://zalo.me');
 
   return (
     <footer className={styles.footer}>
@@ -68,7 +73,7 @@ export const Footer = () => {
             <h4 className={styles.colTitle}>KÊNH HỖ TRỢ 24/7</h4>
             <div className={styles.supportCards}>
               <a
-                href="https://zalo.me"
+                href={zaloUrl}
                 target="_blank"
                 rel="noreferrer"
                 className={styles.supportLink}
@@ -76,20 +81,7 @@ export const Footer = () => {
                 <MessageCircle size={18} className={styles.zaloIcon} />
                 <div className={styles.supportInfo}>
                   <span className={styles.supportLabel}>Zalo CSKH</span>
-                  <span className={styles.supportVal}>0988.776.655</span>
-                </div>
-              </a>
-
-              <a
-                href="https://t.me"
-                target="_blank"
-                rel="noreferrer"
-                className={styles.supportLink}
-              >
-                <Send size={18} className={styles.teleIcon} />
-                <div className={styles.supportInfo}>
-                  <span className={styles.supportLabel}>Telegram Bot</span>
-                  <span className={styles.supportVal}>@ChungSucLQ_Bot</span>
+                  <span className={styles.supportVal}>{supportHotline}</span>
                 </div>
               </a>
             </div>
@@ -106,7 +98,7 @@ export const Footer = () => {
         {/* Bottom Bar */}
         <div className={styles.bottomBar}>
           <p className={styles.copyright}>
-            © 2026 CHUNGSUCLIENQUAN.COM - All rights reserved.
+            © 2026 {brandFullName} - All rights reserved.
           </p>
           <div className={styles.madeWith}>
             <span>Phát triển cho cộng đồng game thủ Liên Quân</span>
