@@ -21,6 +21,17 @@ initializeApp();
 
 const app = express();
 
+// Keep the public contract deliberately narrow so future fields added to the
+// admin site_info document cannot accidentally expose private data.
+const PUBLIC_SITE_INFO_KEYS = [
+  'brandPrimary', 'brandAccent', 'brandDomain', 'brandSubtitle',
+  'footerTitle', 'footerSubtitle', 'zaloUrl', 'supportHotline',
+];
+const toPublicSiteInfo = (value) => PUBLIC_SITE_INFO_KEYS.reduce((result, key) => {
+  if (value && value[key] !== undefined) result[key] = value[key];
+  return result;
+}, {});
+
 // Middleware
 app.use(cors({ origin: true }));
 app.use(express.json({ limit: '10mb' }));
@@ -50,6 +61,19 @@ app.get('/api/packages', async (_req, res) => {
     res.json({ packages: doc.exists ? doc.data() : config.defaultPackages });
   } catch (error) {
     console.error('[API] Get public packages error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Public branding/support settings. This intentionally reads only the
+// site_info document and never includes payment_info or other admin settings.
+app.get('/api/site-info', async (_req, res) => {
+  try {
+    const { getFirestore } = require('firebase-admin/firestore');
+    const doc = await getFirestore().collection('settings').doc('site_info').get();
+    res.json({ siteInfo: toPublicSiteInfo(doc.exists ? doc.data() : config.defaultSiteInfo) });
+  } catch (error) {
+    console.error('[API] Get public site info error:', error);
     res.status(500).json({ error: error.message });
   }
 });

@@ -181,6 +181,14 @@ export const AppProvider = ({ children }) => {
         console.warn('Could not load dynamic settings, using default packages:', err);
       });
 
+    api.getPublicSiteInfo()
+      .then((data) => {
+        if (data && data.siteInfo) setSiteInfo((previous) => ({ ...previous, ...data.siteInfo }));
+      })
+      .catch((err) => {
+        console.warn('Could not load public site info, using defaults:', err);
+      });
+
     // Admin sessions still receive the full settings payload (including
     // customized branding/payment info). Public storefront sessions get a
     // 401 here and safely keep the bundled defaults.

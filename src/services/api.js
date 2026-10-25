@@ -104,6 +104,12 @@ export async function getPublicPackages() {
   return apiRequest('/packages');
 }
 
+// Public storefront branding/support settings. Payment details are never
+// requested by this endpoint.
+export async function getPublicSiteInfo() {
+  return apiRequest('/site-info');
+}
+
 export async function updateSettings(packages) {
   return apiRequest('/settings', {
     method: 'PUT',

@@ -51,6 +51,19 @@ const config = {
     },
   },
 
+  // Public branding and customer support contact information.
+  // Keep this separate from paymentInfo because it is safe for the storefront.
+  defaultSiteInfo: {
+    brandPrimary: 'CHUNGSUC',
+    brandAccent: 'LIENQUAN',
+    brandDomain: '.COM',
+    brandSubtitle: 'SỰ KIỆN CHUNG SỨC • UY TÍN • SIÊU TỐC',
+    footerTitle: 'CHUNGSUCLIENQUAN.COM',
+    footerSubtitle: 'Hệ Thống Cày Tự Động Siêu Tốc',
+    zaloUrl: 'https://zalo.me',
+    supportHotline: '0988.776.655',
+  },
+
   // Admin
   defaultPaymentInfo: {
     bankCode: 'MB',
