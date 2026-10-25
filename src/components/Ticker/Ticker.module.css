@@ -9,6 +9,8 @@
   position: relative;
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
   user-select: none;
+  max-width: 100%;
+  min-width: 0;
 }
 
 /* Left Fixed Time/Icon Badge */

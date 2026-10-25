@@ -85,6 +85,7 @@
   justify-content: space-between;
   gap: 8px;
   min-width: 0;
+  width: 100%;
 }
 
 .packageName {
@@ -107,6 +108,7 @@
   align-items: baseline;
   gap: 4px;
   flex-shrink: 0;
+  max-width: 48%;
 }
 
 .priceValue {
@@ -191,6 +193,9 @@
     font-size: 20px;
   }
   .cardSub { align-items: flex-start; }
+  .cardHeader { align-items: flex-start; }
+  .packageName { overflow-wrap: anywhere; }
+  .priceContainer { max-width: 44%; }
 }
 
 @media (max-width: 360px) {

@@ -1,12 +1,18 @@
 .main {
   min-height: calc(100vh - 200px);
   padding: 24px 0 56px;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  overflow-x: clip;
 }
 
 .container {
   max-width: 1115px;
+  width: 100%;
+  min-width: 0;
   margin: 0 auto;
-  padding: 0 0;
+  padding: 0 16px;
 }
 
 .layoutGrid {
@@ -14,11 +20,14 @@
   grid-template-columns: minmax(0, 2fr) minmax(300px, 1fr);
   gap: 24px;
   align-items: start;
+  min-width: 0;
 }
 
 .leftColumn {
   display: flex;
   flex-direction: column;
+  min-width: 0;
+  max-width: 100%;
 }
 
 .rightColumn {
