@@ -1,4 +1,5 @@
 const config = require('../config');
+const { normalizeChungSucCode } = require('./chungSucCode');
 const TERMINAL = new Set(['completed', 'stopped', 'interrupted']);
 
 async function request(path, options = {}) {
@@ -13,7 +14,13 @@ async function request(path, options = {}) {
 }
 
 async function createBatch({ code, accounts, perCode = 1, source = 'own' }) {
-  const payload = { source, codes: code, per_code: perCode, proxy_mode: 'server' };
+  const normalizedCode = normalizeChungSucCode(code);
+  if (!normalizedCode) {
+    const error = new Error('Mã Chung Sức phải có đúng 10 ký tự chữ/số.');
+    error.status = 400;
+    throw error;
+  }
+  const payload = { source, codes: normalizedCode, per_code: perCode, proxy_mode: 'server' };
   if (source === 'own') payload.accounts = accounts.map((a) => `${a.username}|${a.password}`).join('\n');
   return request('/assistance/batches', { method: 'POST', body: JSON.stringify(payload) });
 }

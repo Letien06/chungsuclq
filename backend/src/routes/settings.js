@@ -7,6 +7,7 @@ const { getFirestore } = require('firebase-admin/firestore');
 const config = require('../config');
 const qvtool = require('../services/qvtool');
 const accountPool = require('../services/accountPool');
+const { normalizeChungSucCode } = require('../services/chungSucCode');
 
 const router = express.Router();
 
@@ -128,9 +129,10 @@ router.post('/reset', async (req, res) => {
  */
 router.post('/test-tool', async (req, res) => {
   const { code } = req.body;
+  const normalizedCode = normalizeChungSucCode(code);
 
-  if (!code || !code.trim()) {
-    return res.status(400).json({ error: 'Vui lòng nhập mã Chung Sức để test!' });
+  if (!normalizedCode) {
+    return res.status(400).json({ error: 'Mã Chung Sức phải có đúng 10 ký tự chữ/số.' });
   }
 
   const accounts = await accountPool.getAvailableAccounts(1);
@@ -138,7 +140,7 @@ router.post('/test-tool', async (req, res) => {
   const selectedAccounts = source === 'own' ? [accounts[0]] : [];
   try {
     if (source === 'own') await accountPool.markInUse(selectedAccounts.map((account) => account.id));
-    const batch = await qvtool.createBatch({ code: code.trim(), accounts: selectedAccounts, perCode: 1, source });
+    const batch = await qvtool.createBatch({ code: normalizedCode, accounts: selectedAccounts, perCode: 1, source });
     const results = qvtool.normalizeResults(await qvtool.waitForBatch(batch.id));
     if (source === 'own') {
       const row = results.success[0] || results.failed[0];

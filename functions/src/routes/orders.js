@@ -5,6 +5,7 @@ const express = require('express');
 const { getFirestore, FieldValue } = require('firebase-admin/firestore');
 const { v4: uuidv4 } = require('uuid');
 const config = require('../config');
+const { normalizeChungSucCode } = require('../services/chungSucCode');
 
 const router = express.Router();
 
@@ -16,11 +17,15 @@ const router = express.Router();
 router.post('/', async (req, res) => {
   try {
     const { chungSucCode, packageId, customerName } = req.body;
+    const normalizedCode = normalizeChungSucCode(chungSucCode);
 
-    if (!chungSucCode || !packageId) {
+    if (!normalizedCode) {
       return res.status(400).json({
-        error: 'Missing required fields: chungSucCode, packageId',
+        error: 'Mã Chung Sức phải có đúng 10 ký tự chữ/số (ví dụ: --RjAeKB2cvY--).',
       });
+    }
+    if (!packageId) {
+      return res.status(400).json({ error: 'Missing required field: packageId' });
     }
 
     // Get package settings
@@ -40,7 +45,7 @@ router.post('/', async (req, res) => {
     // Create order
     const orderId = uuidv4().substring(0, 8).toUpperCase();
     const orderData = {
-      chungSucCode,
+      chungSucCode: normalizedCode,
       packageId,
       packageName: pkg.name,
       customerName: customerName || 'Khách hàng',

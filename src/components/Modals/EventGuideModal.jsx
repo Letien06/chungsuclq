@@ -1,6 +1,6 @@
 import React from 'react';
 import { useApp } from '../../context/AppContext';
-import { X, HelpCircle, Smartphone, Share2, Copy, CheckCircle, ArrowRight } from 'lucide-react';
+import { X, HelpCircle } from 'lucide-react';
 import styles from './EventGuideModal.module.css';
 
 export const EventGuideModal = () => {
@@ -44,7 +44,7 @@ export const EventGuideModal = () => {
             <div className={styles.stepNumber}>3</div>
             <div className={styles.stepContent}>
               <h4>Bấm "Chia Sẻ Mã Mời" (Friend Code)</h4>
-              <p>Bấm vào nút <strong>Mời Bạn Bè</strong> hoặc biểu tượng <strong>Sao Chép Mã Mời</strong> (Mã có dạng <code>LQ#123456</code> hoặc mã chữ/số).</p>
+              <p>Bấm vào nút <strong>Mời Bạn Bè</strong> hoặc biểu tượng <strong>Sao Chép Mã Mời</strong>. Khi dán nội dung chia sẻ như <code>Chia sẻ mã mời --RjAeKB2cvY--</code>, hệ thống sẽ tự lấy mã 10 ký tự ở giữa.</p>
             </div>
           </div>
 

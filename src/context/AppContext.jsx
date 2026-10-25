@@ -3,6 +3,12 @@ import { PACKAGES, INITIAL_TICKER_ITEMS, SAMPLE_HISTORIES } from '../data/packag
 import * as api from '../services/api';
 import { signInWithGoogle, signOutUser } from '../services/firebaseAuth';
 import confetti from 'canvas-confetti';
+import {
+  isValidChungSucCode,
+  normalizeChungSucCode,
+  normalizeChungSucCodesText,
+  parseChungSucCodes,
+} from '../utils/chungSucCode';
 
 const AppContext = createContext();
 
@@ -179,10 +185,9 @@ export const AppProvider = ({ children }) => {
   const currentPackage = packages.find((p) => p.id === selectedPackageId) || packages[0] || PACKAGES[0];
 
   // Bulk codes count
-  const parsedBulkCodes = bulkCodesText
-    .split('\n')
-    .map((c) => c.trim())
-    .filter((c) => c.length > 0);
+  const parsedBulkLines = parseChungSucCodes(bulkCodesText);
+  const invalidBulkCodes = parsedBulkLines.filter((code) => !isValidChungSucCode(code));
+  const parsedBulkCodes = parsedBulkLines.filter(isValidChungSucCode);
 
   // Price calculations
   const effectiveQty = isBulk ? Math.max(1, parsedBulkCodes.length || 1) : quantity;
@@ -261,15 +266,25 @@ export const AppProvider = ({ children }) => {
    * Submit Order - calls real Backend API
    */
   const handleOrderSubmit = async () => {
+    const normalizedFriendCode = normalizeChungSucCode(friendCode);
+
     // 1. Validation
     if (isBulk) {
-      if (parsedBulkCodes.length === 0) {
+      if (parsedBulkCodes.length === 0 && invalidBulkCodes.length === 0) {
         addToast('Lỗi nhập mã', 'Vui lòng nhập ít nhất 1 mã mời (Friend Code)!', 'error');
         return;
       }
+      if (invalidBulkCodes.length > 0) {
+        addToast('Mã không hợp lệ', `Mỗi mã phải gồm đúng 10 ký tự chữ và số. Kiểm tra: ${invalidBulkCodes.join(', ')}`, 'error');
+        return;
+      }
     } else {
-      if (!friendCode.trim()) {
-        addToast('Thiếu mã mời', 'Vui lòng nhập Mã Mời (Friend Code) sự kiện Liên Quân!', 'error');
+      if (!normalizedFriendCode) {
+        addToast('Thiếu mã mời', 'Vui lòng nhập mã Chung Sức của sự kiện Liên Quân!', 'error');
+        return;
+      }
+      if (!isValidChungSucCode(normalizedFriendCode)) {
+        addToast('Mã không hợp lệ', 'Mã phải gồm đúng 10 ký tự chữ và số. Bạn có thể dán nguyên câu chia sẻ, hệ thống sẽ tự tách mã.', 'error');
         return;
       }
     }
@@ -297,7 +312,7 @@ export const AppProvider = ({ children }) => {
     };
     const backendPackageId = legacyPackageMap[currentPackage.id] || currentPackage.id || 'test_the_lsr';
 
-    const codesList = isBulk ? parsedBulkCodes : [friendCode.trim()];
+    const codesList = isBulk ? parsedBulkCodes : [normalizedFriendCode];
 
     // 4. Call Backend API for each code
     try {
@@ -387,12 +402,15 @@ export const AppProvider = ({ children }) => {
         quantity,
         setQuantity,
         friendCode,
-        setFriendCode,
+        setFriendCode: (value) => setFriendCode(normalizeChungSucCode(value)),
         isBulk,
         setIsBulk,
         bulkCodesText,
-        setBulkCodesText,
+        setBulkCodesText: (value) => setBulkCodesText((previous) =>
+          normalizeChungSucCodesText(typeof value === 'function' ? value(previous) : value)
+        ),
         parsedBulkCodes,
+        invalidBulkCodes,
         note,
         setNote,
         effectiveQty,

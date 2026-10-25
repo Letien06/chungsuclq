@@ -37,7 +37,7 @@ export const Ticker = () => {
       <span className={styles.dot}>•</span>
 
       {/* Friend Code */}
-      <span className={styles.codeTag}>{item.code || 'LQ#8812'}</span>
+      <span className={styles.codeTag}>{item.code || 'Ab***Ef'}</span>
 
       <span className={styles.dot}>•</span>
 

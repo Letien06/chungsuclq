@@ -1,6 +1,6 @@
 import React from 'react';
 import { useApp } from '../../context/AppContext';
-import { Ticket, HelpCircle, Clipboard, Check, Layers } from 'lucide-react';
+import { Ticket, HelpCircle, Clipboard, Layers } from 'lucide-react';
 import styles from './FriendCodeInput.module.css';
 
 export const FriendCodeInput = () => {
@@ -69,8 +69,8 @@ export const FriendCodeInput = () => {
             className={styles.inputField}
             placeholder={
               isLsrTest
-                ? "Nhập 1 Mã Quà Tặng Thẻ LSR dùng chung cho tất cả tài khoản..."
-                : "Nhập 1 Mã Mời (Friend Code)..."
+                ? "Nhập mã 10 ký tự (ví dụ: --AB12CD34EF--)..."
+                : "Nhập mã 10 ký tự (ví dụ: [[AB12CD34EF]])..."
             }
             value={friendCode}
             onChange={(e) => setFriendCode(e.target.value)}
@@ -104,7 +104,7 @@ export const FriendCodeInput = () => {
           <div className={styles.bulkHeader}>
             <div className={styles.bulkInfo}>
               <Layers size={16} className={styles.bulkIcon} />
-              <span>Nhập mỗi dòng 1 Mã Mời (Friend Code)</span>
+              <span>Nhập mỗi dòng 1 mã 10 ký tự (có thể dán dạng --CODE-- hoặc [[CODE]])</span>
             </div>
             <div className={styles.bulkStats}>
               Đã nhận diện: <strong className={styles.statsCount}>{parsedBulkCodes.length}</strong> mã
@@ -114,7 +114,7 @@ export const FriendCodeInput = () => {
           <textarea
             className={styles.bulkTextarea}
             rows={5}
-            placeholder={`LQ#882194\nLQ#992144\nLQ#102934\nLQ#774829`}
+            placeholder={`AB12CD34EF\n--ZX98YU76TR--\n[[MN56PQ78RS]]`}
             value={bulkCodesText}
             onChange={(e) => setBulkCodesText(e.target.value)}
           />

@@ -100,7 +100,7 @@ export const INITIAL_TICKER_ITEMS = [
     id: 'tk_2',
     user: 'th***99',
     packageName: 'RƯƠNG SKIN SS',
-    code: 'LQ#8812',
+    code: 'Ab***Ef',
     bi: 190,
     status: 'HOÀN THÀNH',
     price: 30000,
@@ -181,7 +181,7 @@ export const SAMPLE_HISTORIES = [
   {
     id: 'ORD-89214',
     packageName: 'RƯƠNG SKIN SS',
-    friendCode: 'LQ#882194',
+    friendCode: 'Ab12Cd34Ef',
     bi: 190,
     amount: 30000,
     status: 'completed',
@@ -193,7 +193,7 @@ export const SAMPLE_HISTORIES = [
   {
     id: 'ORD-89211',
     packageName: 'FULL 3 RƯƠNG',
-    friendCode: 'LQ#771923',
+    friendCode: 'Xy98Za76Bc',
     bi: 342,
     amount: 50000,
     status: 'processing',
