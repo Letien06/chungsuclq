@@ -209,6 +209,19 @@
   .changeButton svg { width: 14px; height: 14px; }
 }
 
+@media (max-width: 640px) {
+  .sectionHeader,
+  .sectionTitleBox,
+  .sectionSubtitle,
+  .grid,
+  .grid > * {
+    min-width: 0;
+    max-width: 100%;
+  }
+  .sectionHeader { display: block; }
+  .sectionSubtitle { display: block; margin-top: 6px; }
+}
+
 @keyframes sheetUp {
   from { transform: translateY(24px); opacity: 0.4; }
   to { transform: translateY(0); opacity: 1; }

@@ -247,7 +247,10 @@
 }
 
 @media (max-width: 520px) {
-  .inputContainer { flex-wrap: wrap; padding: 4px 6px 6px 12px; }
+  .section { padding-inline: 0; }
+  .headerRow { display: block; }
+  .toggleWrapper { margin-top: 8px; justify-content: flex-end; }
+  .inputContainer { width: 100%; max-width: 100%; flex-wrap: wrap; padding: 4px 6px 6px 12px; overflow: hidden; }
   .inputIconBox { margin-right: 8px; }
   .inputField { flex: 1 1 auto; width: auto; }
   .inputActions { width: 100%; flex: 1 0 100%; justify-content: flex-end; padding-top: 2px; }

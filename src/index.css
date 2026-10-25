@@ -189,6 +189,11 @@ button, input, textarea, select { touch-action: manipulation; }
       url('/sites/chungsuclienquan-com/root/background-mobile.jpg');
     background-position: center top;
   }
+  .main *,
+  .main *::before,
+  .main *::after {
+    max-width: 100%;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
