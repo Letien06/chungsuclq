@@ -110,11 +110,20 @@ export const AppProvider = ({ children }) => {
         displayName: googleUser.displayName,
         avatar: googleUser.avatar,
         balance: existingBalance,
-        isVip: true,
+        isVip: false,
       };
 
       setUser(newUser);
       localStorage.setItem('cslq_user_' + googleUser.uid, JSON.stringify(newUser));
+      try {
+        const balanceData = await api.getMyBalance();
+        const serverBalance = Number(balanceData?.balance || 0);
+        const syncedUser = { ...newUser, balance: serverBalance, balanceSource: 'server' };
+        setUser(syncedUser);
+        localStorage.setItem('cslq_user_' + googleUser.uid, JSON.stringify(syncedUser));
+      } catch (balanceError) {
+        console.warn('[Auth] Could not load server balance:', balanceError);
+      }
       addToast('Đăng nhập thành công', `Chào mừng ${newUser.displayName}!`, 'success');
       closeModal();
     } catch (error) {
@@ -128,7 +137,7 @@ export const AppProvider = ({ children }) => {
       username: username || 'Gamer_VIP',
       displayName: username || 'Chiến Tướng LQ',
       balance: customBalance,
-      isVip: true,
+      isVip: false,
       avatar: 'https://cdn-icons-png.flaticon.com/512/3408/3408545.png'
     };
     setUser(newUser);
@@ -237,12 +246,11 @@ export const AppProvider = ({ children }) => {
 
   // Price calculations
   const effectiveQty = isBulk ? Math.max(1, parsedBulkCodes.length || 1) : quantity;
-  const isMember = Boolean(user);
-  const unitPrice = isMember ? (currentPackage.memberPrice ?? currentPackage.price ?? 0) : (currentPackage.price ?? 0);
+  const unitPrice = currentPackage.price ?? 0;
   const originalTotalPrice = (currentPackage.price ?? 0) * effectiveQty;
   const totalPrice = unitPrice * effectiveQty;
   const totalBi = (currentPackage.bi ?? currentPackage.totalBi ?? 38) * effectiveQty;
-  const discountAmount = originalTotalPrice - totalPrice;
+  const discountAmount = 0;
 
   // Modals management
   const openModal = (modalName) => setActiveModal(modalName);

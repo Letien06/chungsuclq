@@ -172,7 +172,16 @@ export async function getAdminStats() {
 
 export async function listAdminUsers(params = {}) {
   const query = new URLSearchParams(params).toString();
-  return apiRequest(`/admin/users${query ? `?${query}` : ''}`);
+  try {
+    return await apiRequest(`/admin/users${query ? `?${query}` : ''}`);
+  } catch (error) {
+    // Older Render instances exposed the compatibility path while rolling
+    // out the admin route. Retry there so the panel recovers during deploy.
+    if (String(error.message).includes('404') || String(error.message).toLowerCase().includes('not found')) {
+      return apiRequest(`/users${query ? `?${query}` : ''}`);
+    }
+    throw error;
+  }
 }
 
 export async function updateAdminUser(uid, changes) {
@@ -180,6 +189,10 @@ export async function updateAdminUser(uid, changes) {
     method: 'PATCH',
     body: JSON.stringify(changes),
   });
+}
+
+export async function getMyBalance() {
+  return apiRequest('/account/balance');
 }
 
 export async function triggerProcessOrders() {

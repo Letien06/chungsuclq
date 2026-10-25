@@ -10,6 +10,8 @@ router.get('/', async (req, res) => {
     const limit = Math.min(Math.max(Number.parseInt(req.query.limit, 10) || 200, 1), 1000);
     const result = await getAuth().listUsers(limit, req.query.pageToken || undefined);
     const ordersSnap = await getFirestore().collection('orders').select('userId', 'userEmail').get();
+    const balancesSnap = await getFirestore().collection('user_balances').get();
+    const balances = new Map(balancesSnap.docs.map((doc) => [doc.id, Number(doc.data().balance || 0)]));
     const orderCounts = new Map();
     ordersSnap.docs.forEach((doc) => {
       const data = doc.data();
@@ -27,6 +29,7 @@ router.get('/', async (req, res) => {
       createdAt: user.metadata.creationTime || null,
       lastSignInAt: user.metadata.lastSignInTime || null,
       orderCount: orderCounts.get(user.uid) || orderCounts.get(user.email) || 0,
+      balance: balances.get(user.uid) || 0,
     }));
 
     res.json({ users, nextPageToken: result.pageToken || null });
@@ -45,9 +48,27 @@ router.patch('/:uid', async (req, res) => {
       if (!displayName) return res.status(400).json({ error: 'Tên hiển thị không được để trống.' });
       changes.displayName = displayName;
     }
-    if (!Object.keys(changes).length) return res.status(400).json({ error: 'Không có thay đổi hợp lệ.' });
+    const hasBalanceDelta = req.body.balanceDelta !== undefined;
+    const balanceDelta = Number(req.body.balanceDelta);
+    if (hasBalanceDelta && (!Number.isFinite(balanceDelta) || balanceDelta === 0 || Math.abs(balanceDelta) > 1000000000)) {
+      return res.status(400).json({ error: 'Số tiền cộng/trừ không hợp lệ.' });
+    }
+    if (!Object.keys(changes).length && !hasBalanceDelta) return res.status(400).json({ error: 'Không có thay đổi hợp lệ.' });
 
     const user = await getAuth().updateUser(req.params.uid, changes);
+    let balance = 0;
+    const balanceRef = getFirestore().collection('user_balances').doc(req.params.uid);
+    if (hasBalanceDelta) {
+      balance = await getFirestore().runTransaction(async (transaction) => {
+        const snap = await transaction.get(balanceRef);
+        const nextBalance = Math.max(0, Number(snap.exists ? snap.data().balance || 0 : 0) + balanceDelta);
+        transaction.set(balanceRef, { balance: nextBalance, updatedAt: new Date().toISOString(), email: user.email || null }, { merge: true });
+        return nextBalance;
+      });
+    } else {
+      const snap = await balanceRef.get();
+      balance = Number(snap.exists ? snap.data().balance || 0 : 0);
+    }
     res.json({
       success: true,
       user: {
@@ -57,6 +78,7 @@ router.patch('/:uid', async (req, res) => {
         disabled: Boolean(user.disabled),
         createdAt: user.metadata.creationTime || null,
         lastSignInAt: user.metadata.lastSignInTime || null,
+        balance,
       },
     });
   } catch (error) {

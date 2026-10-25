@@ -11,6 +11,7 @@ const cors = require('cors');
 const { initializeApp, cert, applicationDefault } = require('firebase-admin/app');
 const config = require('./config');
 const { startOrderWorker } = require('./services/orderWorker');
+const { requireFirebaseUser } = require('./middleware/firebaseAuth');
 
 // Initialize Firebase Admin SDK
 const serviceAccountPath = path.join(__dirname, '..', 'data', 'serviceAccountKey.json');
@@ -134,6 +135,16 @@ app.use('/api/settings', adminAuth, require('./routes/settings'));
 app.use('/api/admin/users', adminAuth, require('./routes/users'));
 // Compatibility alias for older admin builds that used the shorter path.
 app.use('/api/users', adminAuth, require('./routes/users'));
+
+app.get('/api/account/balance', requireFirebaseUser, async (req, res) => {
+  try {
+    const snap = await require('firebase-admin/firestore').getFirestore()
+      .collection('user_balances').doc(req.user.uid).get();
+    res.json({ balance: Number(snap.exists ? snap.data().balance || 0 : 0) });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
 
 // Health check
 app.get('/api/health', (req, res) => {

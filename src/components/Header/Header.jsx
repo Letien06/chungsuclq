@@ -78,7 +78,6 @@ export const Header = () => {
                 >
                   <img src={user.avatar} alt="Avatar" className={styles.userAvatar} />
                   <span className={styles.userName}>{user.displayName}</span>
-                  {user.isVip && <span className={styles.vipTag}>VIP</span>}
                 </button>
 
                 {userDropdownOpen && (

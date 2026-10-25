@@ -40,7 +40,7 @@ const normalizePackageMap = (packages) => Object.entries(packages || {}).reduce(
     id,
     name: String(pkg.name || id),
     price: Math.max(0, Number(pkg.price) || 0),
-    memberPrice: Math.max(0, Number(pkg.memberPrice) || 0),
+    memberPrice: Math.max(0, Number(pkg.price) || 0),
     accRequired,
     biPerAcc,
     totalBi,
@@ -64,6 +64,7 @@ export function AdminPage() {
   const [userSearch, setUserSearch] = useState('');
   const [editingUserId, setEditingUserId] = useState(null);
   const [editingUserName, setEditingUserName] = useState('');
+  const [balanceInputs, setBalanceInputs] = useState({});
 
   // Account import
   const [importText, setImportText] = useState('');
@@ -239,6 +240,21 @@ export function AdminPage() {
       await loadUsers();
     } catch (err) {
       alert('Không thể đổi tên: ' + err.message);
+      setUsersLoading(false);
+    }
+  };
+
+  const handleAdjustUserBalance = async (user) => {
+    const amount = Number(balanceInputs[user.uid]);
+    if (!Number.isFinite(amount) || amount === 0) return;
+    setUsersLoading(true);
+    try {
+      const result = await api.updateAdminUser(user.uid, { balanceDelta: amount });
+      setUsers((prev) => prev.map((item) => item.uid === user.uid ? { ...item, balance: result.user?.balance ?? ((item.balance || 0) + amount) } : item));
+      setBalanceInputs((prev) => ({ ...prev, [user.uid]: '' }));
+    } catch (err) {
+      alert('Không thể cập nhật số dư: ' + err.message);
+    } finally {
       setUsersLoading(false);
     }
   };
@@ -641,8 +657,8 @@ export function AdminPage() {
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 16, flexWrap: 'wrap', marginBottom: 16 }}>
               <div>
                 <h2 className={styles.sectionTitle} style={{ margin: 0 }}>👤 Người dùng Google</h2>
-                <p className={styles.settingsHint} style={{ margin: '5px 0 0' }}>
-                  Xem tài khoản đã đăng nhập, số đơn và khóa/mở khóa quyền đặt đơn.
+                  <p className={styles.settingsHint} style={{ margin: '5px 0 0' }}>
+                  Xem toàn bộ tài khoản Google, số dư, số đơn và cộng tiền thủ công.
                 </p>
               </div>
               <input
@@ -660,6 +676,7 @@ export function AdminPage() {
                     <th>Tài khoản</th>
                     <th>Gmail</th>
                     <th>Đơn hàng</th>
+                    <th>Số dư</th>
                     <th>Đăng nhập gần nhất</th>
                     <th>Trạng thái</th>
                     <th>Điều khiển</th>
@@ -667,12 +684,12 @@ export function AdminPage() {
                 </thead>
                 <tbody>
                   {usersLoading && users.length === 0 ? (
-                    <tr><td colSpan={6} className={styles.emptyRow}>⏳ Đang tải người dùng...</td></tr>
+                    <tr><td colSpan={7} className={styles.emptyRow}>⏳ Đang tải người dùng...</td></tr>
                   ) : users.filter((user) => {
                     const query = userSearch.trim().toLowerCase();
                     return !query || `${user.displayName} ${user.email}`.toLowerCase().includes(query);
                   }).length === 0 ? (
-                    <tr><td colSpan={6} className={styles.emptyRow}>Chưa có tài khoản phù hợp</td></tr>
+                    <tr><td colSpan={7} className={styles.emptyRow}>Chưa có tài khoản phù hợp</td></tr>
                   ) : users.filter((user) => {
                     const query = userSearch.trim().toLowerCase();
                     return !query || `${user.displayName} ${user.email}`.toLowerCase().includes(query);
@@ -693,6 +710,20 @@ export function AdminPage() {
                       </td>
                       <td>{user.email || '—'}</td>
                       <td>{user.orderCount || 0}</td>
+                      <td>
+                        <strong style={{ color: '#fbbf24' }}>{Number(user.balance || 0).toLocaleString('vi-VN')}đ</strong>
+                        <div style={{ display: 'flex', gap: 4, marginTop: 6, minWidth: 150 }}>
+                          <input
+                            className={styles.loginInput}
+                            type="number"
+                            placeholder="+ / - số tiền"
+                            value={balanceInputs[user.uid] ?? ''}
+                            onChange={(e) => setBalanceInputs((prev) => ({ ...prev, [user.uid]: e.target.value }))}
+                            style={{ margin: 0, minWidth: 0, width: 105 }}
+                          />
+                          <button className={styles.importBtn} onClick={() => handleAdjustUserBalance(user)} disabled={usersLoading}>Cộng</button>
+                        </div>
+                      </td>
                       <td className={styles.timeCell}>{user.lastSignInAt ? new Date(user.lastSignInAt).toLocaleString('vi-VN') : 'Chưa đăng nhập'}</td>
                       <td>
                         <span className={styles.statusBadge} style={{ background: user.disabled ? '#ef4444' : '#10b981' }}>
@@ -1197,17 +1228,6 @@ export function AdminPage() {
                       step={1000}
                       value={pkg.price ?? 0}
                       onChange={(e) => updateEditedPackage(id, { price: Number(e.target.value) })}
-                      disabled={!settingsEditing}
-                    />
-                  </div>
-
-                  <div className={styles.settingsRow}>
-                    <label style={{ color: '#34d399', fontWeight: 'bold' }}>👑 Giá VIP (đ):</label>
-                    <input
-                      type="number"
-                      step={1000}
-                      value={pkg.memberPrice ?? 0}
-                      onChange={(e) => updateEditedPackage(id, { memberPrice: Number(e.target.value) })}
                       disabled={!settingsEditing}
                     />
                   </div>

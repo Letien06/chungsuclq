@@ -61,12 +61,6 @@ export const OrderSummary = () => {
           <span className={styles.priceValue}>{currentPackage.price.toLocaleString('vi-VN')}đ</span>
         </div>
 
-        {user && discountAmount > 0 && (
-          <div className={styles.detailRow}>
-            <span className={styles.label}>Ưu đãi VIP:</span>
-            <span className={styles.discountValue}>-{discountAmount.toLocaleString('vi-VN')}đ</span>
-          </div>
-        )}
 
         <div className={styles.detailRow}>
           <span className={styles.label}>Tổng Vé nhảy nhận được:</span>
