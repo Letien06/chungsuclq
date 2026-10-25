@@ -81,7 +81,7 @@ export function AdminPage() {
   });
   const [editedPaymentInfo, setEditedPaymentInfo] = useState({
     ...BANK_PAYMENT_INFO,
-    transferPrefix: 'NAP',
+    transferPrefix: 'UNGHO',
   });
 
   // Live Test Tool
@@ -176,7 +176,13 @@ export function AdminPage() {
         setEditedSiteInfo(settingsData.siteInfo);
       }
       if (settingsData.paymentInfo) {
-        setEditedPaymentInfo({ ...BANK_PAYMENT_INFO, ...settingsData.paymentInfo });
+        const serverPaymentInfo = settingsData.paymentInfo;
+        const legacyPrefix = ['NAP', 'CSLQ'].includes(String(serverPaymentInfo.transferPrefix || '').trim().toUpperCase());
+        setEditedPaymentInfo({
+          ...BANK_PAYMENT_INFO,
+          ...serverPaymentInfo,
+          transferPrefix: legacyPrefix ? 'UNGHO' : (serverPaymentInfo.transferPrefix || 'UNGHO'),
+        });
       }
     } catch (err) {
       console.error('Load dashboard error:', err);
@@ -389,7 +395,7 @@ export function AdminPage() {
     bankCode: editedPaymentInfo.bankCode,
     accountNumber: editedPaymentInfo.accountNumber,
     amount: 50000,
-    description: `${editedPaymentInfo.transferPrefix || 'NAP'} DEMO 50K`,
+    description: `${editedPaymentInfo.transferPrefix || 'UNGHO'} DEMO`,
     accountName: editedPaymentInfo.accountName,
   });
 
@@ -901,7 +907,7 @@ export function AdminPage() {
                   </div>
                 ))}
                 <p style={{ color: '#94a3b8', fontSize: 12, margin: '4px 0 0' }}>
-                  QR mẫu dùng số tiền 50.000đ. Khi khách chọn số tiền khác, QR sẽ tự đổi theo số tiền đó.
+                  Nội dung tự động có dạng <strong style={{ color: '#fbbf24' }}>UNGHO + username</strong>. QR mẫu dùng số tiền 50.000đ và sẽ tự đổi theo số tiền khách chọn.
                 </p>
               </div>
               <div className={styles.paymentQrPreview}>

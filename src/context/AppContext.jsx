@@ -176,7 +176,15 @@ export const AppProvider = ({ children }) => {
         if (data && data.siteInfo) {
           setSiteInfo(data.siteInfo);
         }
-        if (data && data.paymentInfo) setPaymentInfo({ ...BANK_PAYMENT_INFO, ...data.paymentInfo });
+        if (data && data.paymentInfo) {
+          const serverPaymentInfo = data.paymentInfo;
+          const legacyPrefix = ['NAP', 'CSLQ'].includes(String(serverPaymentInfo.transferPrefix || '').trim().toUpperCase());
+          setPaymentInfo({
+            ...BANK_PAYMENT_INFO,
+            ...serverPaymentInfo,
+            transferPrefix: legacyPrefix ? 'UNGHO' : (serverPaymentInfo.transferPrefix || 'UNGHO'),
+          });
+        }
       })
       .catch((err) => {
         console.warn('Could not load dynamic settings, using default packages:', err);

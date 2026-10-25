@@ -174,7 +174,7 @@ export const BANK_PAYMENT_INFO = {
   bankName: 'MB BANK (Ngân hàng Quân Đội)',
   accountNumber: '999988886666',
   accountName: 'NGUYEN VAN CHUNG SUC',
-  transferPrefix: 'CSLQ',
+  transferPrefix: 'UNGHO',
   momoPhone: '0988776655',
   momoName: 'NGUYEN VAN CHUNG SUC'
 };

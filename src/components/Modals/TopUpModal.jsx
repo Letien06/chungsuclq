@@ -18,7 +18,8 @@ export const TopUpModal = () => {
   if (activeModal !== 'topup') return null;
 
   const username = user?.username || 'CSLQ_GUEST';
-  const transferContent = `${paymentInfo.transferPrefix || 'NAP'} ${username} ${selectedAmount / 1000}K`;
+  const transferPrefix = String(paymentInfo.transferPrefix || 'UNGHO').trim().toUpperCase();
+  const transferContent = `${transferPrefix} ${String(username).trim().replace(/\s+/g, '')}`;
 
   const handleCopy = (text, fieldName) => {
     navigator.clipboard.writeText(text);
