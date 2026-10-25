@@ -6,11 +6,21 @@ const config = require('../config');
 async function processOrder(orderId) {
   const db = getFirestore();
   const orderRef = db.collection('orders').doc(orderId);
-  const snap = await orderRef.get();
-  if (!snap.exists) return { success: false, message: 'Order not found' };
-  const order = snap.data();
-  if (order.status !== 'queued') return { success: false, message: `Order status is ${order.status}, not queued` };
-  await orderRef.update({ status: 'processing', processingStartedAt: FieldValue.serverTimestamp() });
+  // Claim atomically so a poller, manual request, and Firestore trigger cannot
+  // submit the same order to QVTool at the same time.
+  const order = await db.runTransaction(async (transaction) => {
+    const snap = await transaction.get(orderRef);
+    if (!snap.exists) return null;
+    const data = snap.data();
+    if (data.status !== 'queued') return data;
+    transaction.update(orderRef, {
+      status: 'processing',
+      processingStartedAt: FieldValue.serverTimestamp(),
+    });
+    return { ...data, status: 'processing' };
+  });
+  if (!order) return { success: false, message: 'Order not found' };
+  if (order.status !== 'processing') return { success: false, message: `Order status is ${order.status}, not queued` };
 
   const settings = await db.collection('settings').doc('packages').get();
   const packages = settings.exists ? settings.data() : config.defaultPackages;

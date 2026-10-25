@@ -10,6 +10,7 @@ const express = require('express');
 const cors = require('cors');
 const { initializeApp, cert, applicationDefault } = require('firebase-admin/app');
 const config = require('./config');
+const { startOrderWorker } = require('./services/orderWorker');
 
 // Initialize Firebase Admin SDK
 const serviceAccountPath = path.join(__dirname, '..', 'data', 'serviceAccountKey.json');
@@ -163,4 +164,5 @@ app.listen(PORT, '0.0.0.0', () => {
   console.log(`\n🚀 Backend server running on port ${PORT}`);
   console.log(`   Health: http://localhost:${PORT}/api/health`);
   console.log(`   Project: ${process.env.FIREBASE_PROJECT_ID || 'chungsuclq-auto'}\n`);
+  startOrderWorker();
 });
