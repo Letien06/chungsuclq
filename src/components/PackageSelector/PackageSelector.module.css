@@ -52,6 +52,7 @@
   background: linear-gradient(135deg, rgba(255, 106, 0, 0.13), rgba(15, 23, 42, 0.9));
   border: 1px solid rgba(255, 166, 0, 0.42);
   border-radius: var(--radius-md);
+  min-width: 0;
 }
 
 .selectedIcon {
@@ -105,6 +106,7 @@
   font-size: 12px;
   font-weight: 700;
   white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .changeButton:hover { background: rgba(255, 106, 0, 0.2); }
@@ -174,6 +176,17 @@
     animation: sheetUp 0.24s ease-out;
   }
   .modalGrid { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 420px) {
+  .sectionHeader { align-items: flex-start; }
+  .sectionSubtitle { width: 100%; }
+  .selectedService { gap: 9px; padding: 12px; }
+  .selectedIcon { width: 30px; height: 30px; flex-basis: 30px; }
+  .selectedInfo strong { font-size: 13px; }
+  .selectedInfo > span:last-child { font-size: 11px; }
+  .changeButton { padding: 7px 6px; font-size: 10px; }
+  .changeButton svg { width: 14px; height: 14px; }
 }
 
 @keyframes sheetUp {

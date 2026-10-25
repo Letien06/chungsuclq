@@ -223,3 +223,25 @@
     gap: 28px;
   }
 }
+
+/* Tablet and mobile layout refinements */
+@media (max-width: 900px) {
+  .footer { margin-top: 40px; padding-top: 36px; }
+  .container { padding-inline: 16px; gap: 26px; }
+  .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px; }
+  .brandCol { grid-column: 1 / -1; }
+}
+
+@media (max-width: 600px) {
+  .footer { margin-top: 32px; padding: 32px 0 20px; }
+  .container { padding-inline: 12px; gap: 22px; }
+  .grid { grid-template-columns: 1fr; gap: 22px; }
+  .brandCol { grid-column: auto; }
+  .logoName { font-size: 16px; }
+  .bio { font-size: 12px; }
+  .secureBadge { width: 100%; justify-content: center; text-align: center; padding-inline: 8px; }
+  .supportLink { padding: 10px 12px; }
+  .disclaimerBox { padding: 11px 12px; font-size: 10px; }
+  .bottomBar { align-items: flex-start; flex-direction: column; gap: 8px; padding-top: 16px; }
+  .madeWith { font-size: 11px; }
+}

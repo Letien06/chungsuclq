@@ -101,6 +101,7 @@
   border-radius: var(--radius-md);
   padding: 4px 6px 4px 14px;
   transition: all 0.2s ease;
+  min-width: 0;
 }
 
 .inputContainer:focus-within {
@@ -124,6 +125,7 @@
   font-size: 15px;
   font-weight: 500;
   padding: 10px 0;
+  min-width: 0;
 }
 
 .inputField::placeholder {
@@ -191,12 +193,15 @@
   justify-content: space-between;
   font-size: 13px;
   color: #94a3b8;
+  gap: 8px;
+  flex-wrap: wrap;
 }
 
 .bulkInfo {
   display: flex;
   align-items: center;
   gap: 6px;
+  min-width: 0;
 }
 
 .bulkIcon {
@@ -231,4 +236,21 @@
   align-items: center;
   justify-content: flex-end;
   gap: 8px;
+}
+
+@media (max-width: 520px) {
+  .inputContainer { flex-wrap: wrap; padding: 4px 6px 6px 12px; }
+  .inputIconBox { margin-right: 8px; }
+  .inputField { flex: 1 1 calc(100% - 40px); width: 0; }
+  .inputActions { width: 100%; justify-content: flex-end; padding-top: 2px; }
+  .pasteBtn, .guideBtn { min-height: 32px; }
+  .bulkHeader { align-items: flex-start; }
+  .bulkInfo { align-items: flex-start; font-size: 12px; line-height: 1.4; }
+  .bulkStats { width: 100%; text-align: right; font-size: 12px; }
+  .bulkFooter { flex-wrap: wrap; }
+}
+
+@media (max-width: 360px) {
+  .pasteBtn span, .guideBtn span { display: none; }
+  .pasteBtn, .guideBtn { padding: 8px; }
 }

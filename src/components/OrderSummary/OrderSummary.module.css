@@ -43,16 +43,22 @@
   align-items: center;
   justify-content: space-between;
   font-size: 14px;
+  gap: 12px;
+  min-width: 0;
 }
 
 .label {
   color: #94a3b8;
   font-weight: 500;
+  min-width: 0;
 }
 
 .value {
   color: #f1f5f9;
   font-weight: 600;
+  min-width: 0;
+  text-align: right;
+  overflow-wrap: anywhere;
 }
 
 .packageNameHighlight {
@@ -187,6 +193,7 @@
   border-radius: var(--radius-md);
   box-shadow: 0 4px 20px rgba(255, 106, 0, 0.45);
   border: 1px solid rgba(255, 255, 255, 0.25);
+  min-width: 0;
 }
 
 .ctaButton:hover {
@@ -253,5 +260,58 @@
     padding: 10px 12px;
     font-size: 13px;
     box-shadow: none;
+    min-height: 42px;
+    white-space: normal;
+    line-height: 1.25;
   }
+}
+
+/* On phones the checkout summary stays in the document flow so it can be
+   reviewed before payment without covering the form or support buttons. */
+@media (max-width: 640px) {
+  .summaryCard {
+    position: static;
+    display: flex;
+    align-items: stretch;
+    gap: 14px;
+    padding: 16px;
+    background: #111827;
+    border: 1px solid #22324e;
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-card);
+  }
+
+  .header {
+    display: flex;
+    grid-column: auto;
+    grid-row: auto;
+    padding-bottom: 11px;
+    border-bottom: 1px solid #1e2d47;
+  }
+
+  .headerIcon { width: 18px; height: 18px; }
+  .headerTitle { font-size: 15px; }
+  .detailsList,
+  .divider,
+  .memberNotice,
+  .balanceStatus { display: flex; }
+  .detailsList { gap: 9px; }
+  .detailRow { font-size: 13px; align-items: flex-start; }
+  .label { flex: 0 1 46%; }
+  .value { flex: 1 1 54%; }
+  .packageNameHighlight,
+  .priceValue,
+  .totalBiValue { font-size: 14px; }
+  .totalRow { padding-top: 2px; }
+  .totalLabel { display: block; font-size: 15px; }
+  .totalAmount { font-size: 24px; }
+  .memberNotice,
+  .balanceStatus { justify-content: center; min-height: 40px; }
+  .ctaButton { min-height: 46px; }
+}
+
+@media (max-width: 380px) {
+  .summaryCard { padding: 14px; }
+  .detailRow { font-size: 12px; }
+  .totalAmount { font-size: 22px; }
 }
