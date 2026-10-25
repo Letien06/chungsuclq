@@ -14,6 +14,15 @@
   flex-direction: column;
   gap: 5px;
   user-select: none;
+  overflow: hidden;
+}
+
+.card > *,
+.cardHeader,
+.cardSub,
+.progressRow {
+  min-width: 0;
+  max-width: 100%;
 }
 
 .card:focus-visible {
@@ -143,6 +152,10 @@
   color: #38bdf8;
   font-size: 11px;
   white-space: nowrap;
+  min-width: 0;
+  max-width: 48%;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .biAmount strong {
@@ -170,9 +183,18 @@
   align-items: center;
   gap: 7px;
   width: 100%;
+  overflow: hidden;
 }
 
-.progressRow .progressContainer { flex: 1; }
+.progressRow .progressContainer { flex: 1 1 auto; min-width: 0; }
+.progressRow .badge {
+  flex: 0 1 auto;
+  min-width: 0;
+  max-width: 42%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
 
 .progressBar {
   height: 100%;
