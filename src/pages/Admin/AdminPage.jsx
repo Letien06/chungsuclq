@@ -83,6 +83,7 @@ export function AdminPage() {
     brandSubtitle: 'SỰ KIỆN CHUNG SỨC • UY TÍN • SIÊU TỐC',
     footerTitle: 'CHUNGSUCLIENQUAN.COM',
     footerSubtitle: 'Hệ Thống Cày Tự Động Siêu Tốc',
+    pageTitle: 'CHUNGSUCLIENQUAN.COM - Dịch Vụ Cày Chung Sức Liên Quân Tự Động Siêu Tốc',
     zaloUrl: 'https://zalo.me',
     supportHotline: '0988.776.655',
   });
@@ -943,6 +944,21 @@ export function AdminPage() {
               </div>
 
               {/* Slogan & Subtitle */}
+              <div style={{ marginTop: 20 }}>
+                <label style={{ display: 'block', color: '#fbbf24', fontWeight: 'bold', marginBottom: 6 }}>
+                  Tiêu đề tab trình duyệt (Title):
+                </label>
+                <input
+                  type="text"
+                  className={styles.loginInput}
+                  value={editedSiteInfo.pageTitle || ''}
+                  onChange={(e) => setEditedSiteInfo((prev) => ({ ...prev, pageTitle: e.target.value }))}
+                  placeholder="VD: CHUNGSUCLIENQUAN.COM - Dịch Vụ Cày Chung Sức"
+                  style={{ maxWidth: '100%' }}
+                />
+                <span style={{ fontSize: 12, color: '#9ca3af' }}>Tên hiển thị trên tab Chrome và kết quả chia sẻ trang.</span>
+              </div>
+
               <div style={{ marginTop: 20 }}>
                 <label style={{ display: 'block', color: '#93c5fd', fontWeight: 'bold', marginBottom: 6 }}>
                   4. Slogan Header (Dòng chữ nhỏ dưới logo):

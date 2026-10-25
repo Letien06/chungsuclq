@@ -46,6 +46,7 @@ const app = express();
 const PUBLIC_SITE_INFO_KEYS = [
   'brandPrimary', 'brandAccent', 'brandDomain', 'brandSubtitle',
   'footerTitle', 'footerSubtitle', 'zaloUrl', 'supportHotline',
+  'pageTitle',
 ];
 const toPublicSiteInfo = (value) => PUBLIC_SITE_INFO_KEYS.reduce((result, key) => {
   if (value && value[key] !== undefined) result[key] = value[key];

@@ -158,10 +158,16 @@ export const AppProvider = ({ children }) => {
     brandSubtitle: 'SỰ KIỆN CHUNG SỨC • UY TÍN • SIÊU TỐC',
     footerTitle: 'CHUNGSUCLIENQUAN.COM',
     footerSubtitle: 'Hệ Thống Cày Tự Động Siêu Tốc',
+    pageTitle: 'CHUNGSUCLIENQUAN.COM - Dịch Vụ Cày Chung Sức Liên Quân Tự Động Siêu Tốc',
     zaloUrl: 'https://zalo.me',
     supportHotline: '0988.776.655',
   });
   const [paymentInfo, setPaymentInfo] = useState(BANK_PAYMENT_INFO);
+
+  useEffect(() => {
+    const fallbackTitle = `${siteInfo?.brandPrimary || 'CHUNGSUC'}${siteInfo?.brandAccent || 'LIENQUAN'}${siteInfo?.brandDomain || '.COM'} - Dịch Vụ Cày Chung Sức Liên Quân Tự Động Siêu Tốc`;
+    document.title = String(siteInfo?.pageTitle || fallbackTitle).trim();
+  }, [siteInfo]);
 
   // Fetch dynamic packages and prices from backend
   useEffect(() => {

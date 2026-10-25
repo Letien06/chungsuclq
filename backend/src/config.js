@@ -128,6 +128,7 @@ const config = {
     brandSubtitle: 'SỰ KIỆN CHUNG SỨC • UY TÍN • SIÊU TỐC',
     footerTitle: 'CHUNGSUCLIENQUAN.COM',
     footerSubtitle: 'Hệ Thống Cày Tự Động Siêu Tốc',
+    pageTitle: 'CHUNGSUCLIENQUAN.COM - Dịch Vụ Cày Chung Sức Liên Quân Tự Động Siêu Tốc',
     zaloUrl: 'https://zalo.me',
     supportHotline: '0988.776.655',
   },
