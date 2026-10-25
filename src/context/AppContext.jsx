@@ -16,7 +16,15 @@ export const AppProvider = ({ children }) => {
   // 1. Auth State
   const [user, setUser] = useState(() => {
     const saved = localStorage.getItem('cslq_user');
-    return saved ? JSON.parse(saved) : null;
+    if (!saved) return null;
+    const parsed = JSON.parse(saved);
+    // Remove the old demo grant from browser sessions created before the
+    // zero-balance policy. Verified top-ups are not stored in this client
+    // object, so the legacy 250,000 value is never authoritative.
+    if (Number(parsed?.balance) === 250000 && !parsed?.balanceSource) {
+      return { ...parsed, balance: 0 };
+    }
+    return parsed;
   });
 
   // 2. Order Form State
@@ -90,7 +98,10 @@ export const AppProvider = ({ children }) => {
       const savedUser = localStorage.getItem('cslq_user_' + googleUser.uid);
       // A new Firebase account must start at zero. Credit is only changed by
       // a verified top-up/order flow; never grant a demo balance on sign-in.
-      const existingBalance = savedUser ? Number(JSON.parse(savedUser).balance || 0) : 0;
+      const savedProfile = savedUser ? JSON.parse(savedUser) : null;
+      const existingBalance = savedProfile && Number(savedProfile.balance) !== 250000
+        ? Number(savedProfile.balance || 0)
+        : 0;
 
       const newUser = {
         uid: googleUser.uid,
