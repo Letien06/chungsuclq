@@ -74,10 +74,13 @@ const config = {
     momoPhone: '0988776655',
     momoName: 'NGUYEN VAN CHUNG SUC',
   },
-  adminPassword: process.env.ADMIN_PASSWORD || 'changeme123',
+  // Never fall back to a published/default password in production.
+  adminPassword: process.env.ADMIN_PASSWORD || '',
 
   // Worker account cooldown (ms) - 24 hours default
   accountCooldownMs: 24 * 60 * 60 * 1000,
+  maxOrderBatches: Number(process.env.MAX_ORDER_BATCHES || 20),
+  maxOrderAccounts: Number(process.env.MAX_ORDER_ACCOUNTS || 100),
 
   // Order processing
   maxRetries: 3,

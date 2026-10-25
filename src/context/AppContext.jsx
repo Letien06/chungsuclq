@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, useRef, useCallback } from 'react';
 import { PACKAGES, INITIAL_TICKER_ITEMS, SAMPLE_HISTORIES, BANK_PAYMENT_INFO } from '../data/packages';
 import * as api from '../services/api';
-import { signInWithGoogle, signOutUser } from '../services/firebaseAuth';
+import { signInWithGoogle, signOutUser, getCurrentUserIdToken } from '../services/firebaseAuth';
 import confetti from 'canvas-confetti';
 import {
   isValidChungSucCode,
@@ -325,6 +325,16 @@ export const AppProvider = ({ children }) => {
 
     if (!user) {
       addToast('Yêu cầu đăng nhập', 'Vui lòng đăng nhập hoặc nạp tiền!', 'warning');
+      openModal('login');
+      return;
+    }
+
+    // A stale demo/localStorage user is not proof of authentication. Verify
+    // the live Firebase session before checking balance or creating anything.
+    const idToken = await getCurrentUserIdToken();
+    if (!idToken) {
+      setUser(null);
+      addToast('Yêu cầu đăng nhập Google', 'Phiên đăng nhập đã hết hạn, vui lòng đăng nhập lại.', 'warning');
       openModal('login');
       return;
     }

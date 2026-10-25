@@ -5,7 +5,8 @@ const config = require('../config');
 
 const TERMINAL_BATCH_STATES = new Set(['completed', 'stopped', 'interrupted']);
 const asNumber = (value, fallback = 0) => { const parsed = Number(value); return Number.isFinite(parsed) ? parsed : fallback; };
-const isDeadReason = (reason) => /dead|invalid|banned|disabled|exhaust|h(?:ế|e)t\s*l(?:ư|u)ợt|limit/i.test(String(reason || ''));
+const isDeadReason = (reason) => /dead|invalid|banned|disabled|exhaust|h(?:ế|e)t\s*l(?:ư|u)ợt/i.test(String(reason || ''));
+const isTemporaryReason = (reason) => /transport|timeout|network|server[_ -]?rejected|credit|rate|busy|temporar|unavailable|429|5\d\d/i.test(String(reason || ''));
 
 async function settleAccounts(accounts, result) {
   const rowsByUsername = new Map(result.success.concat(result.failed).map((row) => [row.username, row]));
@@ -14,6 +15,7 @@ async function settleAccounts(accounts, result) {
     if (!row) await accountPool.releaseAccounts([account.id]);
     else if (result.success.includes(row)) await accountPool.markUsedSuccess(account.id, row.biEarned || 0);
     else if (isDeadReason(row.reason)) await accountPool.markDead(account.id, row.reason);
+    else if (isTemporaryReason(row.reason)) await accountPool.releaseAccounts([account.id]);
     else await accountPool.markUsedSuccess(account.id, 0);
   }
 }
@@ -68,13 +70,20 @@ async function processOrder(orderId) {
   // A partial order already has batches recorded; resume with only the
   // number of accounts needed for its remaining ticket target.
   let firstBatch = batchIds.length === 0 && biDone === 0;
+  const maxBatches = Math.max(1, asNumber(config.maxOrderBatches, 20));
+  const maxAccounts = Math.max(initialCount, asNumber(config.maxOrderAccounts, 100));
+  let claimedOwnAccounts = 0;
   let activeAccounts = [];
   let lastSource = order.qvtoolSource || null;
 
   try {
     while (firstBatch || biDone < target) {
       const neededBi = Math.max(0, target - biDone);
-      const requested = firstBatch ? initialCount : Math.max(1, Math.ceil(neededBi / perAccountBi));
+      const calculated = firstBatch ? initialCount : Math.max(1, Math.ceil(neededBi / perAccountBi));
+      const requested = firstBatch
+        ? calculated
+        : Math.min(calculated, Math.max(0, maxAccounts - claimedOwnAccounts));
+      if (!requested) break;
       let accounts = await accountPool.claimAvailableAccounts(requested);
       let source = 'own';
       if (firstBatch && accounts.length < requested) {
@@ -85,6 +94,7 @@ async function processOrder(orderId) {
         break;
       }
       activeAccounts = accounts;
+      claimedOwnAccounts += accounts.length;
       const perCode = source === 'own' ? accounts.length : requested;
       const batch = await qvtool.createBatch({ code: order.chungSucCode, accounts, perCode, source });
       const result = qvtool.normalizeResults(await qvtool.waitForBatch(batch.id));
@@ -100,7 +110,8 @@ async function processOrder(orderId) {
       await writeBatchLogs(db, orderId, batchNumber, firstBatch ? 'initial' : 'topup', result);
       await orderRef.update({ status: 'processing', provider: 'qvtool', qvtoolBatchId: result.batchId, qvtoolBatchIds: batchIds, qvtoolSource: source, biDone, biTarget: target, successCount, failedCount, charged });
       firstBatch = false;
-      if (!TERMINAL_BATCH_STATES.has(result.status) || result.timedOut) break;
+      if (result.timedOut || result.status !== 'completed' || result.totalBi <= 0 || result.success.length === 0) break;
+      if (batchNumber >= maxBatches) break;
     }
 
     const reachedTarget = biDone >= target;

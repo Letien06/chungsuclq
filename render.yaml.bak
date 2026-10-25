@@ -12,7 +12,7 @@ services:
       - key: FIREBASE_PROJECT_ID
         value: chungsuclq-auto
       - key: ADMIN_PASSWORD
-        value: changeme123
+        sync: false
       - key: CORS_ORIGIN
         value: https://chungsuclq.vercel.app
       - key: FIREBASE_SERVICE_ACCOUNT

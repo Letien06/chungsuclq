@@ -11,6 +11,7 @@ const {
   requireAdminOrFirebaseUser,
   isAdminRequest,
 } = require('../middleware/firebaseAuth');
+const { orderRateLimit } = require('../middleware/orderRateLimit');
 
 const router = express.Router();
 
@@ -19,7 +20,7 @@ const router = express.Router();
  * Create a new order
  * Body: { chungSucCode, packageId }
  */
-router.post('/', requireFirebaseUser, async (req, res) => {
+router.post('/', requireFirebaseUser, orderRateLimit, async (req, res) => {
   try {
     const { chungSucCode, packageId } = req.body;
     const normalizedCode = normalizeChungSucCode(chungSucCode);
