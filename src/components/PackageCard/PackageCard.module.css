@@ -218,9 +218,9 @@
   }
   .cardSub { align-items: flex-start; }
   .cardHeader {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) auto;
-    align-items: start;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
     width: 100%;
   }
   .packageName {
@@ -231,6 +231,7 @@
   .priceContainer {
     min-width: 0;
     max-width: 100%;
+    width: auto;
     overflow: hidden;
   }
   .priceValue {
@@ -241,12 +242,17 @@
     font-size: 18px;
   }
   .cardSub {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) auto;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-start;
     align-items: start;
+    gap: 3px 8px;
   }
   .speedText { min-width: 0; }
   .biAmount { min-width: 0; max-width: 100%; overflow: hidden; text-overflow: ellipsis; }
+  .progressRow { flex-wrap: wrap; }
+  .progressRow .progressContainer { flex-basis: 100%; }
+  .progressRow .badge { max-width: 100%; }
 }
 
 @media (max-width: 360px) {
