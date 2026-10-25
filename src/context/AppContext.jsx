@@ -45,6 +45,7 @@ export const AppProvider = ({ children }) => {
 
   // 7. Polling refs for active orders
   const pollingRef = useRef(new Map());
+  const submittingOrderRef = useRef(false);
 
   // Sync to localStorage
   useEffect(() => {
@@ -328,6 +329,12 @@ export const AppProvider = ({ children }) => {
       return;
     }
 
+    if (submittingOrderRef.current) {
+      addToast('Đang gửi đơn', 'Đơn của bạn đang được gửi, vui lòng chờ một chút.', 'info');
+      return;
+    }
+    submittingOrderRef.current = true;
+
     // Package IDs are shared by the frontend settings and the backend.
     // Keep legacy aliases for old settings documents only.
     const legacyPackageMap = {
@@ -346,7 +353,6 @@ export const AppProvider = ({ children }) => {
         const result = await api.createOrder({
           chungSucCode: code,
           packageId: backendPackageId,
-          customerName: user.displayName || user.username,
         });
 
         const newOrder = {
@@ -409,6 +415,8 @@ export const AppProvider = ({ children }) => {
     } catch (err) {
       console.error('[Order] Submit error:', err);
       addToast('Lỗi đặt hàng', err.message || 'Không thể kết nối server', 'error');
+    } finally {
+      submittingOrderRef.current = false;
     }
   };
 

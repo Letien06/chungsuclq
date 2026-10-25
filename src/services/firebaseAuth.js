@@ -20,6 +20,14 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app);
 const googleProvider = new GoogleAuthProvider();
+let resolveAuthReady;
+const authReady = new Promise((resolve) => {
+  resolveAuthReady = resolve;
+});
+const stopAuthReadyListener = onAuthStateChanged(auth, (user) => {
+  resolveAuthReady(user);
+  stopAuthReadyListener();
+});
 
 // Google Sign-In helper with popup
 export async function signInWithGoogle() {
@@ -41,6 +49,15 @@ export async function signInWithGoogle() {
 // Sign-Out helper
 export async function signOutUser() {
   return signOut(auth);
+}
+
+// The backend uses this short-lived token to verify that an order really
+// belongs to a signed-in Firebase user. Never send the client-side user
+// object as proof of identity.
+export async function getCurrentUserIdToken(forceRefresh = false) {
+  const currentUser = auth.currentUser || await authReady;
+  if (!currentUser) return null;
+  return currentUser.getIdToken(forceRefresh);
 }
 
 export { onAuthStateChanged };

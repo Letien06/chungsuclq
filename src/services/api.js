@@ -2,6 +2,8 @@
  * API Helper - Centralized API calls to backend
  */
 
+import { getCurrentUserIdToken } from './firebaseAuth';
+
 // Backend URL. Vercel does not always have VITE_API_URL configured, so keep a
 // production fallback instead of accidentally sending API calls to the SPA
 // rewrite and silently falling back to bundled demo settings.
@@ -15,6 +17,14 @@ const API_BASE = import.meta.env.VITE_API_URL || (
 async function apiRequest(path, options = {}) {
   const url = `${API_BASE}${path}`;
   const adminPassword = localStorage.getItem('cslq_admin_password') || '';
+  let idToken = null;
+  try {
+    idToken = await getCurrentUserIdToken();
+  } catch (error) {
+    // Public requests can continue without a token. Protected requests will
+    // receive the server's 401 response and show the normal auth error.
+    console.warn('[API] Could not load Firebase ID token:', error);
+  }
 
   const headers = {
     'Content-Type': 'application/json',
@@ -24,6 +34,9 @@ async function apiRequest(path, options = {}) {
   // Add admin auth header if available
   if (adminPassword) {
     headers['x-admin-password'] = adminPassword;
+  }
+  if (idToken) {
+    headers.Authorization = `Bearer ${idToken}`;
   }
 
   const response = await fetch(url, {
@@ -43,10 +56,15 @@ async function apiRequest(path, options = {}) {
 // Orders API
 // ==========================================
 
-export async function createOrder({ chungSucCode, packageId, customerName }) {
+export async function createOrder({ chungSucCode, packageId }) {
+  const idToken = await getCurrentUserIdToken();
+  if (!idToken) {
+    throw new Error('Vui lòng đăng nhập Google trước khi đặt đơn.');
+  }
   return apiRequest('/orders', {
     method: 'POST',
-    body: JSON.stringify({ chungSucCode, packageId, customerName }),
+    headers: { Authorization: `Bearer ${idToken}` },
+    body: JSON.stringify({ chungSucCode, packageId }),
   });
 }
 

@@ -6,17 +6,22 @@ const { getFirestore, FieldValue } = require('firebase-admin/firestore');
 const { v4: uuidv4 } = require('uuid');
 const config = require('../config');
 const { normalizeChungSucCode } = require('../services/chungSucCode');
+const {
+  requireFirebaseUser,
+  requireAdminOrFirebaseUser,
+  isAdminRequest,
+} = require('../middleware/firebaseAuth');
 
 const router = express.Router();
 
 /**
  * POST /api/orders
  * Create a new order
- * Body: { chungSucCode, packageId, customerName? }
+ * Body: { chungSucCode, packageId }
  */
-router.post('/', async (req, res) => {
+router.post('/', requireFirebaseUser, async (req, res) => {
   try {
-    const { chungSucCode, packageId, customerName } = req.body;
+    const { chungSucCode, packageId } = req.body;
     const normalizedCode = normalizeChungSucCode(chungSucCode);
 
     if (!normalizedCode) {
@@ -44,11 +49,16 @@ router.post('/', async (req, res) => {
 
     // Create order
     const orderId = uuidv4().substring(0, 8).toUpperCase();
+    const customerName = String(
+      req.user.name || req.user.email?.split('@')[0] || 'Khách hàng',
+    ).trim().slice(0, 80) || 'Khách hàng';
     const orderData = {
       chungSucCode: normalizedCode,
       packageId,
       packageName: pkg.name,
-      customerName: customerName || 'Khách hàng',
+      customerName,
+      userId: req.user.uid,
+      userEmail: req.user.email || null,
       accRequired: pkg.accRequired,
       biTarget: pkg.totalBi,
       biDone: 0,
@@ -79,7 +89,7 @@ router.post('/', async (req, res) => {
  * GET /api/orders/:id
  * Get order status
  */
-router.get('/:id', async (req, res) => {
+router.get('/:id', requireAdminOrFirebaseUser(config), async (req, res) => {
   try {
     const db = getFirestore();
     const doc = await db.collection('orders').doc(req.params.id).get();
@@ -89,6 +99,12 @@ router.get('/:id', async (req, res) => {
     }
 
     const data = doc.data();
+    if (!req.isAdmin && data.userId && data.userId !== req.user.uid) {
+      return res.status(403).json({ error: 'Bạn không có quyền xem đơn hàng này.' });
+    }
+    if (!req.isAdmin && !data.userId) {
+      return res.status(403).json({ error: 'Đơn hàng cũ không có thông tin chủ sở hữu.' });
+    }
     res.json({
       id: doc.id,
       ...data,
@@ -106,7 +122,12 @@ router.get('/:id', async (req, res) => {
  * List all orders (admin)
  * Query: ?status=queued&limit=50
  */
-router.get('/', async (req, res) => {
+router.get('/', (req, res, next) => {
+  if (!isAdminRequest(req, config)) {
+    return res.status(401).json({ error: 'Yêu cầu xác thực quản trị viên.' });
+  }
+  return next();
+}, async (req, res) => {
   try {
     const db = getFirestore();
     let query = db.collection('orders').orderBy('createdAt', 'desc');
@@ -140,9 +161,15 @@ router.get('/', async (req, res) => {
  * GET /api/orders/:id/logs
  * Get logs for an order
  */
-router.get('/:id/logs', async (req, res) => {
+router.get('/:id/logs', requireAdminOrFirebaseUser(config), async (req, res) => {
   try {
     const db = getFirestore();
+    const order = await db.collection('orders').doc(req.params.id).get();
+    if (!order.exists) return res.status(404).json({ error: 'Order not found' });
+    const orderData = order.data();
+    if (!req.isAdmin && (!orderData.userId || orderData.userId !== req.user.uid)) {
+      return res.status(403).json({ error: 'Bạn không có quyền xem log đơn hàng này.' });
+    }
     const snap = await db
       .collection('order_logs')
       .where('orderId', '==', req.params.id)
