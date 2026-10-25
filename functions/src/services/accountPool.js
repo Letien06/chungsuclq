@@ -136,6 +136,32 @@ async function getAvailableAccounts(count) {
   return accounts;
 }
 
+/** Atomically claim accounts so concurrent order workers cannot select the same rows. */
+async function claimAvailableAccounts(count) {
+  const requested = Math.max(0, Number.parseInt(count, 10) || 0);
+  if (!requested) return [];
+  const db = getDb();
+  const cooldownThreshold = new Date(Date.now() - config.accountCooldownMs);
+  return db.runTransaction(async (transaction) => {
+    const availableQuery = db.collection(COLLECTION).where('status', '==', 'available').limit(requested);
+    const availableSnap = await transaction.get(availableQuery);
+    const candidates = [...availableSnap.docs];
+    if (candidates.length < requested) {
+      const cooldownQuery = db.collection(COLLECTION)
+        .where('status', '==', 'cooldown')
+        .where('lastUsedAt', '<', cooldownThreshold)
+        .limit(requested - candidates.length);
+      const cooldownSnap = await transaction.get(cooldownQuery);
+      candidates.push(...cooldownSnap.docs);
+    }
+    return candidates.slice(0, requested).map((doc) => {
+      const data = doc.data();
+      transaction.update(doc.ref, { status: 'in_use', claimStartedAt: FieldValue.serverTimestamp() });
+      return { id: doc.id, username: data.username, password: data.password };
+    });
+  });
+}
+
 /**
  * Mark accounts as in_use (lock them for processing)
  * @param {string[]} accountIds
@@ -274,6 +300,7 @@ async function purgeDeadAccounts() {
 module.exports = {
   importAccounts,
   getAvailableAccounts,
+  claimAvailableAccounts,
   markInUse,
   markUsedSuccess,
   markDead,

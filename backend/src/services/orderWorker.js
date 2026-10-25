@@ -3,20 +3,22 @@ const { processOrder } = require('./orderProcessor');
 
 let running = false;
 
+async function findNextOrder() {
+  const orders = getFirestore().collection('orders');
+  const queued = await orders.where('status', '==', 'queued').orderBy('createdAt', 'asc').limit(1).get();
+  if (!queued.empty) return queued.docs[0];
+  const partial = await orders.where('status', '==', 'partial').orderBy('createdAt', 'asc').limit(1).get();
+  return partial.empty ? null : partial.docs[0];
+}
+
 async function processNextQueuedOrder() {
   if (running) return;
   running = true;
   try {
-    const snap = await getFirestore()
-      .collection('orders')
-      .where('status', '==', 'queued')
-      .orderBy('createdAt', 'asc')
-      .limit(1)
-      .get();
-    if (!snap.empty) {
-      const orderId = snap.docs[0].id;
-      console.log(`[Worker] Processing queued order ${orderId}`);
-      console.log('[Worker] Result:', await processOrder(orderId));
+    const doc = await findNextOrder();
+    if (doc) {
+      console.log(`[Worker] Processing ${doc.data().status} order ${doc.id}`);
+      console.log('[Worker] Result:', await processOrder(doc.id));
     }
   } catch (error) {
     console.error('[Worker] Poll failed:', error.message);

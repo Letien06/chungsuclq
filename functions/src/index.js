@@ -99,16 +99,13 @@ app.post('/api/admin/process', adminAuth, async (req, res) => {
     const { processOrder } = require('./services/orderProcessor');
     const db = getFirestore();
 
-    // Get queued orders
-    const snap = await db
-      .collection('orders')
-      .where('status', '==', 'queued')
-      .orderBy('createdAt', 'asc')
-      .limit(1)
-      .get();
+    // Process queued orders first, then resume the oldest partial order.
+    const orders = db.collection('orders');
+    let snap = await orders.where('status', '==', 'queued').orderBy('createdAt', 'asc').limit(1).get();
+    if (snap.empty) snap = await orders.where('status', '==', 'partial').orderBy('createdAt', 'asc').limit(1).get();
 
     if (snap.empty) {
-      return res.json({ message: 'No queued orders to process' });
+      return res.json({ message: 'No queued or resumable partial orders to process' });
     }
 
     const orderId = snap.docs[0].id;
