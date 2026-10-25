@@ -88,7 +88,9 @@ export const AppProvider = ({ children }) => {
     try {
       const googleUser = await signInWithGoogle();
       const savedUser = localStorage.getItem('cslq_user_' + googleUser.uid);
-      const existingBalance = savedUser ? JSON.parse(savedUser).balance : 250000;
+      // A new Firebase account must start at zero. Credit is only changed by
+      // a verified top-up/order flow; never grant a demo balance on sign-in.
+      const existingBalance = savedUser ? Number(JSON.parse(savedUser).balance || 0) : 0;
 
       const newUser = {
         uid: googleUser.uid,
@@ -110,7 +112,7 @@ export const AppProvider = ({ children }) => {
     }
   };
 
-  const login = (username, customBalance = 250000) => {
+  const login = (username, customBalance = 0) => {
     const newUser = {
       username: username || 'Gamer_VIP',
       displayName: username || 'Chiến Tướng LQ',

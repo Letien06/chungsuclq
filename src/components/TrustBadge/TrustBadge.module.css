@@ -1,7 +1,7 @@
 .container {
-  background: linear-gradient(180deg, #111827 0%, #0d1320 100%);
-  border: 1px solid #1f2d45;
-  border-radius: var(--radius-lg);
+  background: linear-gradient(180deg, #111e35 0%, #0c1629 100%);
+  border: 1px solid #244274;
+  border-radius: 7px;
   padding: 18px 20px;
   display: flex;
   flex-direction: column;

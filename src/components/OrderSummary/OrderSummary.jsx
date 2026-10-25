@@ -1,5 +1,6 @@
 import React from 'react';
 import { useApp } from '../../context/AppContext';
+import { QuantitySelector } from '../QuantitySelector/QuantitySelector';
 import { CreditCard, ShoppingCart, Zap, Sparkles, AlertCircle, CheckCircle } from 'lucide-react';
 import styles from './OrderSummary.module.css';
 
@@ -25,6 +26,10 @@ export const OrderSummary = () => {
       <div className={styles.header}>
         <CreditCard size={18} className={styles.headerIcon} />
         <h3 className={styles.headerTitle}>THÔNG TIN THANH TOÁN</h3>
+      </div>
+
+      <div className={styles.quantityInline}>
+        <QuantitySelector compact />
       </div>
 
       {/* Details List */}

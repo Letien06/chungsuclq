@@ -2,7 +2,6 @@ import React from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { AppProvider } from './context/AppContext';
 import { Header } from './components/Header/Header';
-import { Ticker } from './components/Ticker/Ticker';
 import { Home } from './pages/Home/Home';
 import { Footer } from './components/Footer/Footer';
 import { FloatingActions } from './components/FloatingActions/FloatingActions';
@@ -19,9 +18,6 @@ function MainSite() {
     <>
       {/* Header Navigation */}
       <Header />
-
-      {/* Live Running Transaction Ticker */}
-      <Ticker />
 
       {/* Main Content Area */}
       <Home />

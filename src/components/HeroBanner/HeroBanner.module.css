@@ -1,7 +1,7 @@
 .banner {
-  background: linear-gradient(120deg, #141f33, #0f1726 72%);
-  border: 1px solid #263653;
-  border-radius: 14px;
+  background: linear-gradient(120deg, rgba(27,29,35,.97), rgba(18,20,24,.97) 72%);
+  border: 1px solid #2b2e36;
+  border-radius: 7px;
   padding: 18px 20px;
   display: flex;
   align-items: center;
@@ -41,12 +41,12 @@
 }
 
 .avatarBox {
-  width: 58px;
-  height: 58px;
-  border-radius: 8px;
-  border: 1.5px solid #eab308;
+  width: 62px;
+  height: 62px;
+  border-radius: 5px;
+  border: 1px solid rgba(249,115,22,.5);
   overflow: hidden;
-  box-shadow: 0 0 10px rgba(234, 179, 8, 0.35);
+  box-shadow: none;
   background: #0f1522;
 }
 
@@ -69,7 +69,7 @@
   font-size: 19px;
   font-weight: 800;
   color: #ffffff;
-  letter-spacing: -0.02em;
+  letter-spacing: 0.02em;
   text-transform: uppercase;
   line-height: 1.25;
   overflow-wrap: anywhere;
@@ -88,7 +88,7 @@
 }
 
 .subtitleText {
-  color: #ff7a00;
+  color: #f97316;
   font-size: 12px;
   font-weight: 600;
   letter-spacing: 0;

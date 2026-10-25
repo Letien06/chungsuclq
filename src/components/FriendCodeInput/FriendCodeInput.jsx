@@ -39,7 +39,7 @@ export const FriendCodeInput = () => {
     <section className={styles.section}>
       <div className={styles.headerRow}>
         <div className={styles.titleBox}>
-          <span className={styles.stepNumber}>3.</span>
+          <span className={styles.stepNumber}>2.</span>
           <h2 className={styles.sectionTitle}>
             {isLsrTest ? 'MÃ QUÀ TẶNG THẺ LSR' : 'MÃ MỜI (FRIEND CODE)'}
           </h2>

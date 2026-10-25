@@ -1,14 +1,14 @@
 .summaryCard {
-  background: #111827;
-  border: 1.5px solid #22324e;
-  border-radius: var(--radius-lg);
+  background: rgba(18, 20, 24, .97);
+  border: 1px solid #292d35;
+  border-radius: 7px;
   padding: 22px;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.55);
   display: flex;
   flex-direction: column;
   gap: 16px;
   position: sticky;
-  top: 90px;
+  top: 94px;
 }
 
 .header {
@@ -19,13 +19,18 @@
   border-bottom: 1px solid #1e2d47;
 }
 
+.quantityInline {
+  padding: 0 0 2px;
+  border-bottom: 1px solid #1e2d47;
+}
+
 .headerIcon {
   color: var(--accent-orange);
 }
 
 .headerTitle {
   font-family: var(--font-game);
-  font-size: 17px;
+  font-size: 16px;
   font-weight: 800;
   color: #ffffff;
   letter-spacing: 0.5px;
@@ -116,7 +121,7 @@
   font-family: var(--font-game);
   font-size: 28px;
   font-weight: 900;
-  color: var(--accent-orange);
+  color: #f43f49;
   text-shadow: 0 0 16px rgba(255, 106, 0, 0.45);
 }
 
@@ -183,14 +188,14 @@
   align-items: center;
   justify-content: center;
   gap: 10px;
-  background: var(--gradient-primary);
+  background: linear-gradient(135deg, #ef1d24, #ff5b17);
   color: #ffffff;
   font-family: var(--font-game);
   font-size: 17px;
   font-weight: 800;
   letter-spacing: 0.5px;
   padding: 15px 18px;
-  border-radius: var(--radius-md);
+  border-radius: 4px;
   box-shadow: 0 4px 20px rgba(255, 106, 0, 0.45);
   border: 1px solid rgba(255, 255, 255, 0.25);
   min-width: 0;

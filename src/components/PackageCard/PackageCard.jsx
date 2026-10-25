@@ -1,5 +1,5 @@
 import React from 'react';
-import { Check, Flame } from 'lucide-react';
+import { Flame } from 'lucide-react';
 import styles from './PackageCard.module.css';
 
 export const PackageCard = ({ pkg, isSelected, onSelect }) => {
@@ -11,22 +11,6 @@ export const PackageCard = ({ pkg, isSelected, onSelect }) => {
       aria-pressed={isSelected}
       aria-label={`${pkg.name}, ${pkg.price.toLocaleString('vi-VN')} đồng, ${pkg.bi} Vé nhảy`}
     >
-      <div className={styles.cardMeta}>
-        {pkg.badge ? (
-          <div className={`${styles.badge} ${pkg.isPriority ? styles.priorityBadge : styles.normalBadge}`}>
-            {pkg.isPriority && <Flame size={12} />}
-            <span>{pkg.badge}</span>
-          </div>
-        ) : <span className={styles.badgeSpacer} aria-hidden="true" />}
-      </div>
-
-      {/* Selected Indicator Checkmark */}
-      {isSelected && (
-        <div className={styles.checkIndicator}>
-          <Check size={12} strokeWidth={3} />
-        </div>
-      )}
-
       {/* Header Info */}
       <div className={styles.cardHeader}>
         <h3 className={styles.packageName}>{pkg.name}</h3>
@@ -46,11 +30,19 @@ export const PackageCard = ({ pkg, isSelected, onSelect }) => {
       <p className={styles.description}>{pkg.description}</p>
 
       {/* Speed & Boost Progress Bar */}
-      <div className={styles.progressContainer}>
-        <div
-          className={styles.progressBar}
-          style={{ width: `${pkg.progress}%` }}
-        />
+      <div className={styles.progressRow}>
+        <div className={styles.progressContainer}>
+          <div
+            className={styles.progressBar}
+            style={{ width: `${pkg.progress}%` }}
+          />
+        </div>
+        {pkg.isPriority && (
+          <span className={`${styles.badge} ${styles.priorityBadge}`}>
+            <Flame size={11} />
+            <span>{pkg.badge || 'ƯU TIÊN'}</span>
+          </span>
+        )}
       </div>
     </button>
   );

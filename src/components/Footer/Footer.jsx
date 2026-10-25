@@ -23,7 +23,7 @@ export const Footer = () => {
           <div className={styles.brandCol}>
             <div className={styles.logoRow}>
               <div className={styles.logoIcon}>
-                <img src="/arthur.png" alt="Arthur 5v5" className={styles.footerLogoImg} />
+                <img src="/arthur.png" alt="Avatar Liên Quân" className={styles.footerLogoImg} />
               </div>
               <div className={styles.logoText}>
                 <span className={styles.logoName}>{siteInfo?.footerTitle || brandFullName}</span>

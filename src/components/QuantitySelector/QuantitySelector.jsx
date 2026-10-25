@@ -3,7 +3,7 @@ import { useApp } from '../../context/AppContext';
 import { Minus, Plus } from 'lucide-react';
 import styles from './QuantitySelector.module.css';
 
-export const QuantitySelector = () => {
+export const QuantitySelector = ({ compact = false }) => {
   const { quantity, setQuantity, currentPackage, isBulk, parsedBulkCodes } = useApp();
 
   const handleDecrement = () => {
@@ -34,7 +34,7 @@ export const QuantitySelector = () => {
   };
 
   return (
-    <section className={styles.section}>
+    <section className={`${styles.section} ${compact ? styles.compact : ''}`}>
       <div className={styles.sectionTitleBox}>
         <span className={styles.stepNumber}>2.</span>
         <h2 className={styles.sectionTitle}>SỐ LƯỢNG (GÓI)</h2>

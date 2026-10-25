@@ -1,5 +1,9 @@
 .section {
-  margin-bottom: 28px;
+  margin-bottom: 22px;
+  padding: 20px;
+  background: rgba(18,20,24,.9);
+  border: 1px solid #292d35;
+  border-radius: 7px;
 }
 
 .sectionHeader {
@@ -28,7 +32,7 @@
   font-family: var(--font-main);
   font-size: 14px;
   font-weight: 800;
-  color: var(--accent-orange);
+  color: #f97316;
   letter-spacing: 0.02em;
   text-transform: uppercase;
 }

@@ -1,12 +1,12 @@
 .footer {
-  background: #080c14;
-  border-top: 1px solid #1a253a;
+  background: rgba(10, 11, 14, .96);
+  border-top: 1px solid #262a33;
   padding: 48px 0 24px 0;
   margin-top: 60px;
 }
 
 .container {
-  max-width: 1280px;
+  max-width: 1115px;
   margin: 0 auto;
   padding: 0 16px;
   display: flex;
@@ -34,10 +34,10 @@
 }
 
 .logoIcon {
-  width: 38px;
-  height: 38px;
+  width: 42px;
+  height: 42px;
   border-radius: 6px;
-  border: 1px solid #eab308;
+  border: 1px solid rgba(249,115,22,.45);
   overflow: hidden;
   display: flex;
   align-items: center;

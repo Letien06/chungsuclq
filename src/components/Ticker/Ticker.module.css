@@ -174,3 +174,25 @@
     animation-duration: 25s;
   }
 }
+
+/* Match the narrow ticker inside the main content column. */
+.tickerWrapper {
+  height: 36px;
+  margin-bottom: 20px;
+  border: 1px solid #2a2d35;
+  border-bottom: 1px solid #2a2d35;
+  border-radius: 6px;
+  background: rgba(18, 20, 24, .93);
+  box-shadow: 0 8px 18px rgba(0,0,0,.18);
+}
+.leftFixedBadge { background: #17191e; padding-inline: 10px; font-size: 11px; }
+.marqueeGroup { gap: 11px; }
+.tickerCard { gap: 6px; font-size: 11px; }
+.statusBadge { font-size: 11px; }
+.priceTag { font-size: 12px; }
+.timeTag { font-size: 10px; }
+
+@media (max-width: 640px) {
+  .tickerWrapper { margin-bottom: 14px; }
+  .leftFixedBadge { display: none; }
+}
