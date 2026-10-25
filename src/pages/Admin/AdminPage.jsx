@@ -59,6 +59,11 @@ export function AdminPage() {
   const [stats, setStats] = useState(null);
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [users, setUsers] = useState([]);
+  const [usersLoading, setUsersLoading] = useState(false);
+  const [userSearch, setUserSearch] = useState('');
+  const [editingUserId, setEditingUserId] = useState(null);
+  const [editingUserName, setEditingUserName] = useState('');
 
   // Account import
   const [importText, setImportText] = useState('');
@@ -192,6 +197,50 @@ export function AdminPage() {
     }
     setLoading(false);
   }, [isAuthed]);
+
+  const loadUsers = useCallback(async () => {
+    if (!isAuthed) return;
+    setUsersLoading(true);
+    try {
+      const data = await api.listAdminUsers({ limit: 200 });
+      setUsers(data.users || []);
+    } catch (err) {
+      alert('Không tải được danh sách người dùng: ' + err.message);
+    } finally {
+      setUsersLoading(false);
+    }
+  }, [isAuthed]);
+
+  useEffect(() => {
+    if (activeTab === 'users') loadUsers();
+  }, [activeTab, loadUsers]);
+
+  const handleToggleUser = async (user) => {
+    const action = user.disabled ? 'mở khóa' : 'khóa';
+    if (!window.confirm(`Bạn có chắc muốn ${action} tài khoản ${user.email || user.uid}?`)) return;
+    setUsersLoading(true);
+    try {
+      await api.updateAdminUser(user.uid, { disabled: !user.disabled });
+      await loadUsers();
+    } catch (err) {
+      alert('Không thể cập nhật tài khoản: ' + err.message);
+      setUsersLoading(false);
+    }
+  };
+
+  const handleSaveUserName = async (user) => {
+    const displayName = editingUserName.trim();
+    if (!displayName) return;
+    setUsersLoading(true);
+    try {
+      await api.updateAdminUser(user.uid, { displayName });
+      setEditingUserId(null);
+      await loadUsers();
+    } catch (err) {
+      alert('Không thể đổi tên: ' + err.message);
+      setUsersLoading(false);
+    }
+  };
 
   // Save Site Info & Branding
   const handleSaveSiteInfo = async () => {
@@ -437,6 +486,7 @@ export function AdminPage() {
         {[
           { id: 'dashboard', label: '📊 Dashboard' },
           { id: 'orders', label: '📦 Đơn hàng' },
+          { id: 'users', label: '👤 Người dùng' },
           { id: 'accounts', label: '👥 Kho ACC' },
           { id: 'branding', label: '🌐 Tên Miền & Logo' },
           { id: 'payment', label: '💳 Tài khoản nhận tiền' },
@@ -578,6 +628,83 @@ export function AdminPage() {
                       </tr>
                     ))
                   )}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
+
+        {/* ========== USERS ========== */}
+        {activeTab === 'users' && (
+          <div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 16, flexWrap: 'wrap', marginBottom: 16 }}>
+              <div>
+                <h2 className={styles.sectionTitle} style={{ margin: 0 }}>👤 Người dùng Google</h2>
+                <p className={styles.settingsHint} style={{ margin: '5px 0 0' }}>
+                  Xem tài khoản đã đăng nhập, số đơn và khóa/mở khóa quyền đặt đơn.
+                </p>
+              </div>
+              <input
+                className={styles.loginInput}
+                value={userSearch}
+                onChange={(e) => setUserSearch(e.target.value)}
+                placeholder="Tìm theo tên hoặc Gmail..."
+                style={{ maxWidth: 300, margin: 0 }}
+              />
+            </div>
+            <div className={styles.tableWrapper}>
+              <table className={styles.table}>
+                <thead>
+                  <tr>
+                    <th>Tài khoản</th>
+                    <th>Gmail</th>
+                    <th>Đơn hàng</th>
+                    <th>Đăng nhập gần nhất</th>
+                    <th>Trạng thái</th>
+                    <th>Điều khiển</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {usersLoading && users.length === 0 ? (
+                    <tr><td colSpan={6} className={styles.emptyRow}>⏳ Đang tải người dùng...</td></tr>
+                  ) : users.filter((user) => {
+                    const query = userSearch.trim().toLowerCase();
+                    return !query || `${user.displayName} ${user.email}`.toLowerCase().includes(query);
+                  }).length === 0 ? (
+                    <tr><td colSpan={6} className={styles.emptyRow}>Chưa có tài khoản phù hợp</td></tr>
+                  ) : users.filter((user) => {
+                    const query = userSearch.trim().toLowerCase();
+                    return !query || `${user.displayName} ${user.email}`.toLowerCase().includes(query);
+                  }).map((user) => (
+                    <tr key={user.uid}>
+                      <td>
+                        {editingUserId === user.uid ? (
+                          <div style={{ display: 'flex', gap: 6, minWidth: 180 }}>
+                            <input className={styles.loginInput} value={editingUserName} onChange={(e) => setEditingUserName(e.target.value)} style={{ margin: 0, minWidth: 0 }} />
+                            <button className={styles.importBtn} onClick={() => handleSaveUserName(user)} disabled={usersLoading}>Lưu</button>
+                          </div>
+                        ) : (
+                          <button type="button" onClick={() => { setEditingUserId(user.uid); setEditingUserName(user.displayName || ''); }} style={{ background: 'none', border: 0, color: '#f8fafc', cursor: 'pointer', fontWeight: 700, padding: 0 }}>
+                            {user.displayName || 'Chưa đặt tên'} ✎
+                          </button>
+                        )}
+                        <div style={{ color: '#64748b', fontSize: 11, marginTop: 4 }}>{user.uid}</div>
+                      </td>
+                      <td>{user.email || '—'}</td>
+                      <td>{user.orderCount || 0}</td>
+                      <td className={styles.timeCell}>{user.lastSignInAt ? new Date(user.lastSignInAt).toLocaleString('vi-VN') : 'Chưa đăng nhập'}</td>
+                      <td>
+                        <span className={styles.statusBadge} style={{ background: user.disabled ? '#ef4444' : '#10b981' }}>
+                          {user.disabled ? 'Đã khóa' : 'Đang hoạt động'}
+                        </span>
+                      </td>
+                      <td>
+                        <button className={user.disabled ? styles.importBtn : styles.actionBtnDanger} onClick={() => handleToggleUser(user)} disabled={usersLoading}>
+                          {user.disabled ? '🔓 Mở khóa' : '⛔ Khóa tài khoản'}
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
                 </tbody>
               </table>
             </div>

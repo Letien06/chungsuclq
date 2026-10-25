@@ -170,6 +170,18 @@ export async function getAdminStats() {
   return apiRequest('/admin/stats');
 }
 
+export async function listAdminUsers(params = {}) {
+  const query = new URLSearchParams(params).toString();
+  return apiRequest(`/admin/users${query ? `?${query}` : ''}`);
+}
+
+export async function updateAdminUser(uid, changes) {
+  return apiRequest(`/admin/users/${encodeURIComponent(uid)}`, {
+    method: 'PATCH',
+    body: JSON.stringify(changes),
+  });
+}
+
 export async function triggerProcessOrders() {
   return apiRequest('/admin/process', {
     method: 'POST',
