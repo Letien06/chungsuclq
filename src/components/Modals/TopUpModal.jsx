@@ -1,19 +1,14 @@
 import React, { useState } from 'react';
 import { useApp } from '../../context/AppContext';
 import { buildVietQrUrl } from '../../utils/vietqr';
-import { X, QrCode, Smartphone, CreditCard, Copy, Check, Zap, Sparkles, ShieldCheck } from 'lucide-react';
+import { X, QrCode, Smartphone, CreditCard, Copy, Check, Sparkles } from 'lucide-react';
 import styles from './TopUpModal.module.css';
 
 export const TopUpModal = () => {
-  const { activeModal, closeModal, user, topUpBalance, addToast, paymentInfo } = useApp();
-  const [method, setMethod] = useState('bank'); // 'bank' | 'momo' | 'card'
+  const { activeModal, closeModal, user, addToast, paymentInfo } = useApp();
+  const [method, setMethod] = useState('bank'); // 'bank' | 'momo'
   const [selectedAmount, setSelectedAmount] = useState(50000);
   const [copiedField, setCopiedField] = useState(null);
-
-  // Card form state
-  const [cardTelco, setCardTelco] = useState('VIETTEL');
-  const [cardSerial, setCardSerial] = useState('');
-  const [cardCode, setCardCode] = useState('');
 
   if (activeModal !== 'topup') return null;
 
@@ -26,19 +21,6 @@ export const TopUpModal = () => {
     setCopiedField(fieldName);
     addToast('Đã sao chép', `Đã sao chép ${fieldName} vào clipboard!`, 'info');
     setTimeout(() => setCopiedField(null), 2500);
-  };
-
-  const handleCardSubmit = (e) => {
-    e.preventDefault();
-    if (!cardSerial || !cardCode) {
-      addToast('Lỗi nhập thẻ', 'Vui lòng nhập đầy đủ mã thẻ và số serial!', 'error');
-      return;
-    }
-    // Simulate auto card recharge
-    addToast('Đang nạp thẻ...', 'Hệ thống đang kiểm tra thẻ cào của bạn...', 'info');
-    setTimeout(() => {
-      topUpBalance(selectedAmount);
-    }, 1500);
   };
 
   const qrUrl = buildVietQrUrl({
@@ -87,13 +69,6 @@ export const TopUpModal = () => {
             <span>Ví MoMo</span>
           </button>
 
-          <button
-            className={`${styles.methodBtn} ${method === 'card' ? styles.methodActive : ''}`}
-            onClick={() => setMethod('card')}
-          >
-            <CreditCard size={16} />
-            <span>Thẻ Cào</span>
-          </button>
         </div>
 
         {/* Amount Selector Chips */}
@@ -216,61 +191,6 @@ export const TopUpModal = () => {
           </div>
         )}
 
-        {/* Tab 3: Thẻ Cào */}
-        {method === 'card' && (
-          <form className={styles.cardForm} onSubmit={handleCardSubmit}>
-            <div className={styles.cardSelectGroup}>
-              {['VIETTEL', 'VINAPHONE', 'MOBIFONE'].map((telco) => (
-                <button
-                  key={telco}
-                  type="button"
-                  className={`${styles.telcoBtn} ${cardTelco === telco ? styles.telcoActive : ''}`}
-                  onClick={() => setCardTelco(telco)}
-                >
-                  {telco}
-                </button>
-              ))}
-            </div>
-
-            <div className={styles.cardInputGroup}>
-              <input
-                type="text"
-                className={styles.cardInput}
-                placeholder="Nhập mã thẻ..."
-                value={cardCode}
-                onChange={(e) => setCardCode(e.target.value)}
-                required
-              />
-              <input
-                type="text"
-                className={styles.cardInput}
-                placeholder="Nhập số serial..."
-                value={cardSerial}
-                onChange={(e) => setCardSerial(e.target.value)}
-                required
-              />
-            </div>
-
-            <button type="submit" className={styles.cardSubmitBtn}>
-              NẠP THẺ CÀO NGAY
-            </button>
-          </form>
-        )}
-
-        {/* Quick Instant Test Recharge (Simulator) */}
-        <div className={styles.demoBar}>
-          <div className={styles.demoPrompt}>
-            <span>⚙️ Đang ở chế độ Demo FE:</span>
-          </div>
-          <button
-            type="button"
-            className={styles.demoTopupBtn}
-            onClick={() => topUpBalance(selectedAmount)}
-          >
-            <Zap size={15} />
-            <span>Mô phỏng Nạp Ngay {selectedAmount.toLocaleString('vi-VN')}đ (1-Click)</span>
-          </button>
-        </div>
       </div>
     </div>
   );
