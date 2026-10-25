@@ -94,6 +94,12 @@ export async function getSettings() {
   return apiRequest('/settings');
 }
 
+// Public storefront endpoint. Unlike getSettings(), this response contains
+// only package definitions and never exposes admin payment configuration.
+export async function getPublicPackages() {
+  return apiRequest('/packages');
+}
+
 export async function updateSettings(packages) {
   return apiRequest('/settings', {
     method: 'PUT',

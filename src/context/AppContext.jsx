@@ -164,30 +164,39 @@ export const AppProvider = ({ children }) => {
 
   // Fetch dynamic packages and prices from backend
   useEffect(() => {
-    api.getSettings()
+    api.getPublicPackages()
       .then((data) => {
-        if (data && data.packages) {
-          const pkgList = Object.values(data.packages);
-          if (pkgList.length > 0) {
-            setPackages(pkgList);
-          }
-        }
-        if (data && data.siteInfo) {
-          setSiteInfo(data.siteInfo);
-        }
-        if (data && data.paymentInfo) {
-          const serverPaymentInfo = data.paymentInfo;
-          const legacyPrefix = ['NAP', 'CSLQ'].includes(String(serverPaymentInfo.transferPrefix || '').trim().toUpperCase());
-          setPaymentInfo({
-            ...BANK_PAYMENT_INFO,
-            ...serverPaymentInfo,
-            transferPrefix: legacyPrefix ? 'UNGHO' : (serverPaymentInfo.transferPrefix || 'UNGHO'),
-          });
-        }
+        if (!data || !data.packages) return;
+        const pkgList = Object.values(data.packages);
+        if (pkgList.length === 0) return;
+        setPackages(pkgList);
+        // A package can be removed from Admin after the storefront has
+        // initialized. Keep the selection pointing at an available package
+        // so the deleted ID cannot remain active in the order form.
+        setSelectedPackageId((previousId) => (
+          pkgList.some((pkg) => pkg.id === previousId) ? previousId : pkgList[0].id
+        ));
       })
       .catch((err) => {
         console.warn('Could not load dynamic settings, using default packages:', err);
       });
+
+    // Admin sessions still receive the full settings payload (including
+    // customized branding/payment info). Public storefront sessions get a
+    // 401 here and safely keep the bundled defaults.
+    api.getSettings()
+      .then((data) => {
+        if (data && data.siteInfo) setSiteInfo(data.siteInfo);
+        if (!data || !data.paymentInfo) return;
+        const serverPaymentInfo = data.paymentInfo;
+        const legacyPrefix = ['NAP', 'CSLQ'].includes(String(serverPaymentInfo.transferPrefix || '').trim().toUpperCase());
+        setPaymentInfo({
+          ...BANK_PAYMENT_INFO,
+          ...serverPaymentInfo,
+          transferPrefix: legacyPrefix ? 'UNGHO' : (serverPaymentInfo.transferPrefix || 'UNGHO'),
+        });
+      })
+      .catch(() => { /* Full settings are admin-only; public defaults remain active. */ });
   }, []);
 
   // Selected package object

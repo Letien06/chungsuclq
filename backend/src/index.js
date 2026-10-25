@@ -71,6 +71,20 @@ const adminAuth = (req, res, next) => {
 // Public routes
 app.use('/api/orders', require('./routes/orders'));
 
+// The storefront only needs package definitions. Keep this narrow public
+// endpoint separate from /api/settings, which also contains payment details
+// and remains admin-protected.
+app.get('/api/packages', async (_req, res) => {
+  try {
+    const { getFirestore } = require('firebase-admin/firestore');
+    const doc = await getFirestore().collection('settings').doc('packages').get();
+    res.json({ packages: doc.exists ? doc.data() : config.defaultPackages });
+  } catch (error) {
+    console.error('[API] Get public packages error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
 // Admin-protected routes
 app.use('/api/accounts', adminAuth, require('./routes/accounts'));
 app.use('/api/settings', adminAuth, require('./routes/settings'));
