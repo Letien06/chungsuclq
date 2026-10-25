@@ -506,7 +506,6 @@ export const AppProvider = ({ children }) => {
         totalPrice,
         totalBi,
         discountAmount,
-        isMember,
         orderHistory,
         activeModal,
         openModal,
