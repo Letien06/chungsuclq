@@ -2,8 +2,12 @@
  * API Helper - Centralized API calls to backend
  */
 
-// Backend URL - change this based on environment
-const API_BASE = import.meta.env.VITE_API_URL || '/api';
+// Backend URL. Vercel does not always have VITE_API_URL configured, so keep a
+// production fallback instead of accidentally sending API calls to the SPA
+// rewrite and silently falling back to bundled demo settings.
+const API_BASE = import.meta.env.VITE_API_URL || (
+  import.meta.env.DEV ? 'http://localhost:10000/api' : 'https://chungsuclq-backend.onrender.com/api'
+);
 
 /**
  * Helper to make API requests
