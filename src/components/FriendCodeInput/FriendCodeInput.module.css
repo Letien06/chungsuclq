@@ -15,6 +15,7 @@
   display: flex;
   align-items: center;
   gap: 6px;
+  min-width: 0;
 }
 
 .stepNumber {
@@ -32,6 +33,8 @@
   letter-spacing: 0.03em;
   line-height: 1.25;
   text-transform: uppercase;
+  min-width: 0;
+  overflow-wrap: anywhere;
 }
 
 .requiredStar {
@@ -138,6 +141,8 @@
   display: flex;
   align-items: center;
   gap: 6px;
+  min-width: 0;
+  flex-shrink: 0;
 }
 
 .pasteBtn, .guideBtn {
@@ -243,8 +248,8 @@
 @media (max-width: 520px) {
   .inputContainer { flex-wrap: wrap; padding: 4px 6px 6px 12px; }
   .inputIconBox { margin-right: 8px; }
-  .inputField { flex: 1 1 calc(100% - 40px); width: 0; }
-  .inputActions { width: 100%; justify-content: flex-end; padding-top: 2px; }
+  .inputField { flex: 1 1 auto; width: auto; }
+  .inputActions { width: 100%; flex: 1 0 100%; justify-content: flex-end; padding-top: 2px; }
   .pasteBtn, .guideBtn { min-height: 32px; }
   .bulkHeader { align-items: flex-start; }
   .bulkInfo { align-items: flex-start; font-size: 12px; line-height: 1.4; }

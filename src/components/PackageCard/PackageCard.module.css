@@ -198,3 +198,18 @@
   }
   .cardSub { align-items: flex-start; }
 }
+
+@media (max-width: 360px) {
+  .cardHeader {
+    align-items: flex-start;
+  }
+
+  .cardSub {
+    flex-wrap: wrap;
+    row-gap: 3px;
+  }
+
+  .biAmount {
+    margin-left: auto;
+  }
+}

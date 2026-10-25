@@ -71,7 +71,9 @@
 .selectedInfo {
   display: flex;
   flex-direction: column;
+  flex: 1 1 auto;
   min-width: 0;
+  overflow: hidden;
   gap: 3px;
 }
 
@@ -94,6 +96,9 @@
 .selectedInfo > span:last-child {
   color: #94a3b8;
   font-size: 11px;
+  min-width: 0;
+  overflow-wrap: anywhere;
+  line-height: 1.35;
 }
 
 .changeButton {
