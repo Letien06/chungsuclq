@@ -1,11 +1,11 @@
 /**
- * Express API Router - Settings & Test Tool (Admin)
- * Manages package configuration, cookies, and live tool testing
+ * Express API Router - Settings & QVTool test (Admin)
+ * Manages package configuration and live QVTool API testing
  */
 const express = require('express');
-const { getFirestore, FieldValue } = require('firebase-admin/firestore');
+const { getFirestore } = require('firebase-admin/firestore');
 const config = require('../config');
-const SieuCap5sAutomation = require('../services/sieucap5s');
+const qvtool = require('../services/qvtool');
 const accountPool = require('../services/accountPool');
 
 const router = express.Router();
@@ -81,7 +81,7 @@ router.put('/', async (req, res) => {
       pkg.price = Number(pkg.price) >= 0 ? Number(pkg.price) : 0;
       pkg.memberPrice = Number(pkg.memberPrice) >= 0 ? Number(pkg.memberPrice) : 0;
       pkg.accRequired = parseInt(pkg.accRequired) || 1;
-      pkg.biPerAcc = parseInt(pkg.biPerAcc) || 25;
+      pkg.biPerAcc = parseInt(pkg.biPerAcc) || 38;
       pkg.totalBi = parseInt(pkg.totalBi) || (pkg.accRequired * pkg.biPerAcc);
       pkg.bi = pkg.totalBi;
     }
@@ -121,94 +121,34 @@ router.post('/reset', async (req, res) => {
 });
 
 /**
- * GET /api/settings/cookies
- * Check current cookie status
- */
-router.get('/cookies', async (req, res) => {
-  try {
-    const db = getFirestore();
-    const doc = await db.collection('settings').doc('sieucap5s_cookies').get();
-
-    if (!doc.exists || !doc.data()?.cookies) {
-      return res.json({ hasCookies: false, count: 0 });
-    }
-
-    const data = doc.data();
-    res.json({
-      hasCookies: true,
-      count: data.cookies?.length || 0,
-      updatedAt: data.updatedAt?.toDate?.()?.toISOString?.() || null,
-    });
-  } catch (error) {
-    console.error('[API] Get cookies status error:', error);
-    res.status(500).json({ error: error.message });
-  }
-});
-
-/**
- * POST /api/settings/cookies
- * Save cookies from admin UI
- * Body: { cookies: "cookie string or JSON array" }
- */
-router.post('/cookies', async (req, res) => {
-  try {
-    const { cookies } = req.body;
-
-    if (!cookies) {
-      return res.status(400).json({ error: 'Missing cookies data' });
-    }
-
-    const parsedCookies = SieuCap5sAutomation.parseCookieString(cookies);
-    if (!parsedCookies || parsedCookies.length === 0) {
-      return res.status(400).json({ error: 'Invalid cookie format. Paste document.cookie or JSON format.' });
-    }
-
-    const automation = new SieuCap5sAutomation();
-    await automation._saveCookies(parsedCookies);
-
-    res.json({
-      success: true,
-      message: `Đã lưu ${parsedCookies.length} cookies thành công!`,
-      count: parsedCookies.length,
-    });
-  } catch (error) {
-    console.error('[API] Save cookies error:', error);
-    res.status(500).json({ error: error.message });
-  }
-});
-
-/**
  * POST /api/settings/test-tool
- * Live test of SieuCap5s tool
- * Body: { code: "Mã Quà Tặng LSR" }
+ * Live test of QVTool API. Uses one local account when available,
+ * otherwise QVTool's stock pool.
+ * Body: { code: "Mã Chung Sức" }
  */
 router.post('/test-tool', async (req, res) => {
   const { code } = req.body;
 
   if (!code || !code.trim()) {
-    return res.status(400).json({ error: 'Vui lòng nhập Mã Quà Tặng / Mã Chung Sức để test!' });
+    return res.status(400).json({ error: 'Vui lòng nhập mã Chung Sức để test!' });
   }
 
-  // Get available accounts
   const accounts = await accountPool.getAvailableAccounts(1);
-  if (accounts.length === 0) {
-    return res.status(400).json({
-      error: 'Kho ACC đang trống! Vui lòng vào mục Kho ACC nạp ít nhất 1 tài khoản để chạy test.'
-    });
-  }
-
-  let automation = null;
+  const source = accounts.length > 0 ? 'own' : 'stock';
+  const selectedAccounts = source === 'own' ? [accounts[0]] : [];
   try {
-    console.log(`[TestTool] Starting test with code: ${code.trim()} and 1 account (${accounts[0].username})`);
-    automation = new SieuCap5sAutomation();
-    await automation.init();
-    await automation.login();
-
-    const results = await automation.runTool([accounts[0]], code.trim());
+    if (source === 'own') await accountPool.markInUse(selectedAccounts.map((account) => account.id));
+    const batch = await qvtool.createBatch({ code: code.trim(), accounts: selectedAccounts, perCode: 1, source });
+    const results = qvtool.normalizeResults(await qvtool.waitForBatch(batch.id));
+    if (source === 'own') {
+      const row = results.success[0] || results.failed[0];
+      if (row) await accountPool.markUsedSuccess(selectedAccounts[0].id, row.biEarned || 0);
+      else await accountPool.releaseAccounts(selectedAccounts.map((account) => account.id));
+    }
 
     res.json({
       success: true,
-      message: 'Chạy test tool thành công!',
+      message: `Đã tạo lượt chạy QVTool bằng kho ${source === 'own' ? 'local' : 'QVTool'}.`,
       results,
     });
   } catch (error) {
@@ -217,10 +157,6 @@ router.post('/test-tool', async (req, res) => {
       success: false,
       error: error.message,
     });
-  } finally {
-    if (automation) {
-      await automation.close();
-    }
   }
 });
 

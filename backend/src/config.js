@@ -2,7 +2,15 @@
  * Configuration constants for the backend
  */
 const config = {
-  // SieuCap5s settings
+  // QVTool API settings. Keep the key in the deployment environment only.
+  qvtool: {
+    baseUrl: process.env.QVTOOL_API_URL || 'https://aov.qvtool.com/api/v1',
+    apiKey: process.env.QVTOOL_API_KEY || '',
+    resultPollInterval: Number(process.env.QVTOOL_POLL_INTERVAL || 5000),
+    resultTimeout: Number(process.env.QVTOOL_RESULT_TIMEOUT || 540000),
+  },
+
+  // Legacy SieuCap5s settings (kept only for backward compatibility)
   sieucap5s: {
     baseUrl: 'https://sieucap5s.com',
     toolUrl: process.env.SIEUCAP5S_TOOL_URL ||
@@ -21,25 +29,25 @@ const config = {
   defaultPackages: {
     test_the_lsr: {
       id: 'test_the_lsr',
-      name: '🎁 TEST TOOL: TẶNG THẺ LSR',
+      name: '🎁 TEST TOOL: QVTOOL CHUNG SỨC',
       price: 0,
       memberPrice: 0,
       accRequired: 1,
-      biPerAcc: 25,
-      totalBi: 25,
+      biPerAcc: 38,
+      totalBi: 38,
       badge: 'TEST MIỄN PHÍ',
-      description: 'Test gửi mã quà tặng SK Thẻ LSR trực tiếp qua tool sieucap5s.com (1 Acc test)',
+      description: 'Test gửi mã quà tặng Chung Sức qua QVTool (1 tài khoản)',
       isPriority: true,
-      speedText: 'Test trực tiếp SieuCap5s',
+      speedText: 'Test trực tiếp QVTool',
     },
     full_3_ruong: {
       id: 'full_3_ruong',
       name: 'FULL 3 RƯƠNG',
       price: 50000,
       memberPrice: 45000,
-      accRequired: 10,
-      biPerAcc: 25,
-      totalBi: 250,
+      accRequired: 9,
+      biPerAcc: 38,
+      totalBi: 342,
       badge: 'ƯU TIÊN',
       description: 'Cày full 3 rương sự kiện nhanh nhất, nhận tối đa quà tặng',
       isPriority: false,
@@ -50,9 +58,9 @@ const config = {
       name: 'RƯƠNG SKIN SS',
       price: 30000,
       memberPrice: 27000,
-      accRequired: 4,
-      biPerAcc: 25,
-      totalBi: 100,
+      accRequired: 5,
+      biPerAcc: 38,
+      totalBi: 190,
       badge: 'PHỔ BIẾN',
       description: 'Mở khóa ngay rương Trang phục bậc SS tự chọn',
       isPriority: false,
@@ -60,14 +68,14 @@ const config = {
     },
     '25_bi_le': {
       id: '25_bi_le',
-      name: '25 BỈ LẺ',
-      price: 15000,
-      memberPrice: 13500,
+      name: '38 VÉ NHẢY LẺ',
+      price: 10000,
+      memberPrice: 9000,
       accRequired: 1,
-      biPerAcc: 25,
-      totalBi: 25,
+      biPerAcc: 38,
+      totalBi: 38,
       badge: '',
-      description: 'Bổ sung số bỉ lẻ còn thiếu để nhận thưởng ngay',
+      description: 'Bổ sung số vé nhảy còn thiếu để nhận thưởng ngay',
       isPriority: false,
       speedText: 'Tốc độ siêu tốc',
     },
@@ -77,10 +85,10 @@ const config = {
       price: 100000,
       memberPrice: 90000,
       accRequired: 20,
-      biPerAcc: 25,
-      totalBi: 500,
+      biPerAcc: 38,
+      totalBi: 760,
       badge: 'TIẾT KIỆM',
-      description: 'Gói cày bỉ số lượng lớn giá cực kỳ ưu đãi',
+      description: 'Gói cày vé nhảy số lượng lớn giá cực kỳ ưu đãi',
       isPriority: false,
       speedText: 'Tốc độ siêu tốc',
     },
@@ -90,8 +98,8 @@ const config = {
       price: 180000,
       memberPrice: 162000,
       accRequired: 40,
-      biPerAcc: 25,
-      totalBi: 1000,
+      biPerAcc: 38,
+      totalBi: 1520,
       badge: 'VIP',
       description: 'Dành cho các chiến thần săn trọn bộ Skin SSS & hữu hạn',
       isPriority: false,
@@ -103,10 +111,10 @@ const config = {
       price: 450000,
       memberPrice: 400000,
       accRequired: 80,
-      biPerAcc: 25,
-      totalBi: 2000,
+      biPerAcc: 38,
+      totalBi: 3040,
       badge: 'SVIP',
-      description: 'Gói cày max bỉ dành cho dân chơi hệ VIP',
+      description: 'Gói cày max vé nhảy dành cho dân chơi hệ VIP',
       isPriority: false,
       speedText: 'Tốc độ siêu tốc',
     },
@@ -135,5 +143,9 @@ const config = {
   maxRetries: 3,
   retryDelayMs: 30000, // 30 seconds
 };
+
+// Keep compatibility with older Firestore settings that used these IDs.
+config.defaultPackages.ruong_ss = { ...config.defaultPackages.ruong_skin_ss, id: 'ruong_ss' };
+config.defaultPackages.full_ruong = { ...config.defaultPackages.full_3_ruong, id: 'full_ruong' };
 
 module.exports = config;

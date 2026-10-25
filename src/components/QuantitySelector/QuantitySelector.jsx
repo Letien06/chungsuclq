@@ -87,7 +87,7 @@ export const QuantitySelector = () => {
           <div className={styles.infoRow}>
             <span className={styles.infoLabel}>Bao Gồm:</span>
             <span className={styles.biHighlight}>
-              {currentPackage.bi} Bỉ
+              {currentPackage.bi} Vé nhảy
             </span>
           </div>
         </div>

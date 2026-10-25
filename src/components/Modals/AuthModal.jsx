@@ -53,7 +53,7 @@ export const AuthModal = () => {
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10, color: '#f59e0b', fontSize: 14 }}>
             <Sparkles size={16} />
-            <span>Tự động theo dõi tiến độ cày Bỉ realtime</span>
+            <span>Tự động theo dõi tiến độ cày Vé nhảy realtime</span>
           </div>
         </div>
 

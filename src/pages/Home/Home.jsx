@@ -23,7 +23,7 @@ export const Home = () => {
     },
     {
       q: 'Sau khi cày xong kiểm tra ở đâu?',
-      a: 'Bạn chỉ cần vào game Liên Quân Mobile > Mục Sự Kiện > Chung Sức. Bạn sẽ thấy thanh tiến độ Bỉ đã đầy và có thể mở khóa nhận ngay Rương Trang Phục SS/SSS!'
+      a: 'Bạn chỉ cần vào game Liên Quân Mobile > Mục Sự Kiện > Chung Sức. Bạn sẽ thấy thanh tiến độ Vé nhảy đã đầy và có thể mở khóa nhận ngay Rương Trang Phục SS/SSS!'
     },
     {
       q: 'Tôi muốn đặt số lượng lớn cho nhiều nick thì làm sao?',
@@ -38,7 +38,7 @@ export const Home = () => {
       package: 'FULL 3 RƯƠNG',
       rating: 5,
       time: '15 phút trước',
-      comment: 'Cày siêu tốc thật sự, bấm đặt xong vô game thấy 200 Bỉ rồi, mở ra ngay skin SS Valhein!'
+      comment: 'Cày siêu tốc thật sự, bấm đặt xong vô game thấy 342 Vé nhảy rồi, mở ra ngay skin SS Valhein!'
     },
     {
       user: 'Tuấn***Anh',

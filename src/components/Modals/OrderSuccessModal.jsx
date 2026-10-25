@@ -39,8 +39,8 @@ export const OrderSuccessModal = () => {
           </div>
 
           <div className={styles.cardRow}>
-            <span className={styles.label}>Số Bỉ sẽ nhận:</span>
-            <span className={styles.valBi}>+{lastCompletedOrder.bi} Bỉ</span>
+            <span className={styles.label}>Số Vé nhảy sẽ nhận:</span>
+            <span className={styles.valBi}>+{lastCompletedOrder.bi} Vé nhảy</span>
           </div>
 
           <div className={styles.cardRow}>

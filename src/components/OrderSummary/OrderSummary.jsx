@@ -47,8 +47,8 @@ export const OrderSummary = () => {
         </div>
 
         <div className={styles.detailRow}>
-          <span className={styles.label}>Bỉ/Gói:</span>
-          <span className={styles.biValue}>{currentPackage.bi} Bỉ</span>
+          <span className={styles.label}>Vé nhảy/Gói:</span>
+          <span className={styles.biValue}>{currentPackage.bi} Vé nhảy</span>
         </div>
 
         <div className={styles.detailRow}>
@@ -64,8 +64,8 @@ export const OrderSummary = () => {
         )}
 
         <div className={styles.detailRow}>
-          <span className={styles.label}>Tổng Bỉ nhận được:</span>
-          <span className={styles.totalBiValue}>⚡ {totalBi.toLocaleString('vi-VN')} Bỉ</span>
+          <span className={styles.label}>Tổng Vé nhảy nhận được:</span>
+          <span className={styles.totalBiValue}>⚡ {totalBi.toLocaleString('vi-VN')} Vé nhảy</span>
         </div>
       </div>
 

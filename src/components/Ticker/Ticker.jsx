@@ -42,7 +42,7 @@ export const Ticker = () => {
       <span className={styles.dot}>•</span>
 
       {/* Bi Amount */}
-      <span className={styles.biTag}>{item.bi} Bỉ</span>
+      <span className={styles.biTag}>{item.bi} Vé nhảy</span>
 
       <span className={styles.dot}>•</span>
 

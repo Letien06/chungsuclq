@@ -190,7 +190,7 @@ export const AppProvider = ({ children }) => {
   const unitPrice = isMember ? (currentPackage.memberPrice ?? currentPackage.price ?? 0) : (currentPackage.price ?? 0);
   const originalTotalPrice = (currentPackage.price ?? 0) * effectiveQty;
   const totalPrice = unitPrice * effectiveQty;
-  const totalBi = (currentPackage.bi ?? currentPackage.totalBi ?? 25) * effectiveQty;
+  const totalBi = (currentPackage.bi ?? currentPackage.totalBi ?? 38) * effectiveQty;
   const discountAmount = originalTotalPrice - totalPrice;
 
   // Modals management
@@ -218,13 +218,13 @@ export const AppProvider = ({ children }) => {
 
             let statusText = 'Đang chờ xử lý...';
             if (data.status === 'processing') {
-              statusText = `Đang cày (${biDone}/${biTarget} Bỉ)`;
+              statusText = `Đang cày (${biDone}/${biTarget} Vé nhảy)`;
             } else if (data.status === 'completed') {
               statusText = 'Hoàn thành 100%';
             } else if (data.status === 'failed') {
               statusText = `Thất bại: ${data.error || 'Lỗi không xác định'}`;
             } else if (data.status === 'partial') {
-              statusText = `Hoàn thành 1 phần (${biDone}/${biTarget} Bỉ)`;
+              statusText = `Hoàn thành 1 phần (${biDone}/${biTarget} Vé nhảy)`;
             }
 
             return {
@@ -244,7 +244,7 @@ export const AppProvider = ({ children }) => {
           pollingRef.current.delete(orderId);
 
           if (data.status === 'completed') {
-            addToast('Hoàn thành cày Bỉ!', `Đơn #${orderId} đã cày xong! Hãy vào game kiểm tra.`, 'success');
+            addToast('Hoàn thành cày Vé nhảy!', `Đơn #${orderId} đã cày xong! Hãy vào game kiểm tra.`, 'success');
           } else if (data.status === 'failed') {
             addToast('Đơn hàng thất bại', `Đơn #${orderId}: ${data.error || 'Lỗi'}`, 'error');
           }
@@ -287,17 +287,15 @@ export const AppProvider = ({ children }) => {
       return;
     }
 
-    // 3. Map frontend package ID to backend package ID
-    const packageMap = {
-      'test_the_lsr': 'test_the_lsr',
-      'ruong_skin_ss': 'ruong_ss',
-      'full_3_ruong': 'full_ruong',
-      '25_bi_le': 'ruong_ss',
-      'goi_san_sss': 'full_ruong',
-      'goi_vip': 'full_ruong',
-      'goi_svip': 'full_ruong',
+    // Package IDs are shared by the frontend settings and the backend.
+    // Keep legacy aliases for old settings documents only.
+    const legacyPackageMap = {
+      goi_vip: 'goi_san_sss_vip',
+      goi_svip: 'goi_san_sss_svip',
+      ruong_ss: 'ruong_skin_ss',
+      full_ruong: 'full_3_ruong',
     };
-    const backendPackageId = packageMap[currentPackage.id] || 'test_the_lsr';
+    const backendPackageId = legacyPackageMap[currentPackage.id] || currentPackage.id || 'test_the_lsr';
 
     const codesList = isBulk ? parsedBulkCodes : [friendCode.trim()];
 

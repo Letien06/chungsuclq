@@ -35,7 +35,7 @@ export const PackageCard = ({ pkg, isSelected, onSelect }) => {
       <div className={styles.cardSub}>
         <span className={styles.speedText}>{pkg.speedText}</span>
         <span className={styles.biAmount}>
-          <strong>{pkg.bi}</strong> Bỉ
+          <strong>{pkg.bi}</strong> Vé nhảy
         </span>
       </div>
 

@@ -3,8 +3,10 @@
  * Manages package configuration (number of accounts per package, etc.)
  */
 const express = require('express');
-const { getFirestore, FieldValue } = require('firebase-admin/firestore');
+const { getFirestore } = require('firebase-admin/firestore');
 const config = require('../config');
+const qvtool = require('../services/qvtool');
+const accountPool = require('../services/accountPool');
 
 const router = express.Router();
 
@@ -39,8 +41,8 @@ router.get('/', async (req, res) => {
  * PUT /api/settings
  * Update package settings
  * Body: {
- *   ruong_ss: { name: "Rương SS", accRequired: 4, biPerAcc: 25, totalBi: 100 },
- *   full_ruong: { name: "Full 3 Rương", accRequired: 10, biPerAcc: 25, totalBi: 250 }
+ *   ruong_ss: { name: "Rương SS", accRequired: 5, biPerAcc: 38, totalBi: 190 },
+ *   full_ruong: { name: "Full 3 Rương", accRequired: 9, biPerAcc: 38, totalBi: 342 }
  * }
  */
 router.put('/', async (req, res) => {
@@ -59,6 +61,7 @@ router.put('/', async (req, res) => {
         });
       }
       // Ensure totalBi is calculated
+      pkg.biPerAcc = parseInt(pkg.biPerAcc) || 38;
       pkg.totalBi = pkg.accRequired * pkg.biPerAcc;
       pkg.id = id;
     }
@@ -94,6 +97,44 @@ router.post('/reset', async (req, res) => {
   } catch (error) {
     console.error('[API] Reset settings error:', error);
     res.status(500).json({ error: error.message });
+  }
+});
+
+/**
+ * POST /api/settings/test-tool
+ * Run a small QVTool test using one local account when available,
+ * otherwise QVTool's stock pool.
+ */
+router.post('/test-tool', async (req, res) => {
+  const { code } = req.body;
+  if (!code || !code.trim()) {
+    return res.status(400).json({ error: 'Vui lòng nhập mã Chung Sức để test!' });
+  }
+
+  const accounts = await accountPool.getAvailableAccounts(1);
+  const source = accounts.length > 0 ? 'own' : 'stock';
+  const selectedAccounts = source === 'own' ? [accounts[0]] : [];
+
+  try {
+    if (source === 'own') await accountPool.markInUse(selectedAccounts.map((account) => account.id));
+    const batch = await qvtool.createBatch({ code: code.trim(), accounts: selectedAccounts, perCode: 1, source });
+
+    const results = qvtool.normalizeResults(await qvtool.waitForBatch(batch.id));
+    if (source === 'own') {
+      const row = results.success[0] || results.failed[0];
+      if (row) await accountPool.markUsedSuccess(selectedAccounts[0].id, row.biEarned || 0);
+      else await accountPool.releaseAccounts(selectedAccounts.map((account) => account.id));
+    }
+
+    res.json({
+      success: true,
+      message: `Đã tạo lượt chạy QVTool bằng kho ${source === 'own' ? 'local' : 'QVTool'}.`,
+      results,
+    });
+  } catch (error) {
+    if (source === 'own') await accountPool.releaseAccounts(selectedAccounts.map((account) => account.id));
+    console.error('[TestTool] Error:', error);
+    res.status(500).json({ success: false, error: error.message });
   }
 });
 

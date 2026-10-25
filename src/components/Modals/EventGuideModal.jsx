@@ -58,7 +58,7 @@ export const EventGuideModal = () => {
         </div>
 
         <div className={styles.footerNote}>
-          🔒 <strong>Lưu ý:</strong> Website tuyệt đối KHÔNG yêu cầu tài khoản, mật khẩu hay mã OTP của bạn. Chỉ cần Friend Code là hệ thống có thể hỗ trợ cày bỉ an toàn 100%!
+          🔒 <strong>Lưu ý:</strong> Website tuyệt đối KHÔNG yêu cầu tài khoản, mật khẩu hay mã OTP của bạn. Chỉ cần Friend Code là hệ thống có thể hỗ trợ cày vé nhảy an toàn 100%!
         </div>
 
         <button className={styles.doneBtn} onClick={closeModal}>

@@ -114,17 +114,6 @@ export async function resetSettings() {
   });
 }
 
-export async function getCookieStatus() {
-  return apiRequest('/settings/cookies');
-}
-
-export async function saveCookies(cookies) {
-  return apiRequest('/settings/cookies', {
-    method: 'POST',
-    body: JSON.stringify({ cookies }),
-  });
-}
-
 export async function testToolLive(code) {
   return apiRequest('/settings/test-tool', {
     method: 'POST',

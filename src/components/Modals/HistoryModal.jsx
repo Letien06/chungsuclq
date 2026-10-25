@@ -127,7 +127,7 @@ export const HistoryModal = () => {
                   </div>
 
                   <div className={styles.priceDateBox}>
-                    <span className={styles.biTag}>+{ord.bi} Bỉ</span>
+                    <span className={styles.biTag}>+{ord.bi} Vé nhảy</span>
                     <span className={styles.amountTag}>
                       {ord.amount?.toLocaleString('vi-VN')}đ
                     </span>

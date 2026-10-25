@@ -33,12 +33,6 @@ export function AdminPage() {
     footerSubtitle: 'Hệ Thống Cày Tự Động Siêu Tốc',
   });
 
-  // Cookies Management
-  const [cookieStatus, setCookieStatus] = useState(null);
-  const [cookieInput, setCookieInput] = useState('');
-  const [cookieSaving, setCookieSaving] = useState(false);
-  const [cookieResult, setCookieResult] = useState(null);
-
   // Live Test Tool
   const [testCode, setTestCode] = useState('');
   const [testRunning, setTestRunning] = useState(false);
@@ -65,7 +59,7 @@ export function AdminPage() {
     } catch (err) {
       console.error('Admin login error:', err);
       if (err.message && err.message.includes('401')) {
-        setAuthError('❌ Sai mật khẩu admin! Mật khẩu là: tien3006');
+        setAuthError('❌ Sai mật khẩu admin!');
       } else {
         setAuthError(`❌ ${err.message || 'Lỗi kết nối máy chủ'}. (Máy chủ Render đang kết nối, vui lòng thử lại sau vài giây).`);
       }
@@ -80,11 +74,10 @@ export function AdminPage() {
     if (!isAuthed) return;
     setLoading(true);
     try {
-      const [statsData, ordersData, settingsData, cookiesData] = await Promise.all([
+      const [statsData, ordersData, settingsData] = await Promise.all([
         api.getAdminStats(),
         api.listOrders({ limit: 20 }),
         api.getSettings(),
-        api.getCookieStatus().catch(() => ({ hasCookies: false, count: 0 })),
       ]);
       setStats(statsData);
       setOrders(ordersData.orders || []);
@@ -94,7 +87,6 @@ export function AdminPage() {
         setSiteInfo(settingsData.siteInfo);
         setEditedSiteInfo(settingsData.siteInfo);
       }
-      setCookieStatus(cookiesData);
     } catch (err) {
       console.error('Load dashboard error:', err);
     }
@@ -177,27 +169,10 @@ export function AdminPage() {
     setLoading(false);
   };
 
-  // Save Cookies
-  const handleSaveCookies = async () => {
-    if (!cookieInput.trim()) return;
-    setCookieSaving(true);
-    setCookieResult(null);
-    try {
-      const res = await api.saveCookies(cookieInput.trim());
-      setCookieResult(res);
-      setCookieInput('');
-      const updated = await api.getCookieStatus();
-      setCookieStatus(updated);
-    } catch (err) {
-      setCookieResult({ error: err.message });
-    }
-    setCookieSaving(false);
-  };
-
   // Run Test Tool
   const handleRunTest = async () => {
     if (!testCode.trim()) {
-      alert('Vui lòng nhập Mã Quà Tặng SK Thẻ LSR để test!');
+      alert('Vui lòng nhập mã Chung Sức để test!');
       return;
     }
     setTestRunning(true);
@@ -305,8 +280,7 @@ export function AdminPage() {
           { id: 'accounts', label: '👥 Kho ACC' },
           { id: 'branding', label: '🌐 Tên Miền & Logo' },
           { id: 'settings', label: '⚙️ Giá & Gói Cước' },
-          { id: 'test', label: '🧪 Test Tool SieuCap5s' },
-          { id: 'cookies', label: '🍪 Cookies SieuCap5s' },
+          { id: 'test', label: '🧪 Test QVTool API' },
         ].map((tab) => (
           <button
             key={tab.id}
@@ -385,7 +359,7 @@ export function AdminPage() {
             {/* Quick Actions */}
             <div className={styles.quickActions}>
               <button className={styles.actionBtn} onClick={() => setActiveTab('test')}>
-                🧪 Chạy Test Tool SieuCap5s
+                🧪 Chạy Test QVTool API
               </button>
               <button className={styles.actionBtn} onClick={handleTriggerProcess} disabled={loading}>
                 🚀 Xử lý đơn chờ
@@ -408,7 +382,7 @@ export function AdminPage() {
                     <th>ID</th>
                     <th>Mã Chung Sức / LSR</th>
                     <th>Gói</th>
-                    <th>Bỉ</th>
+                    <th>Vé nhảy</th>
                     <th>Trạng thái</th>
                     <th>Thời gian</th>
                   </tr>
@@ -508,18 +482,18 @@ export function AdminPage() {
           </div>
         )}
 
-        {/* ========== TEST TOOL SIEUCAP5S ========== */}
+        {/* ========== QVTOOL API TEST ========== */}
         {activeTab === 'test' && (
           <div>
-            <h2 className={styles.sectionTitle}>🧪 Test Kết Nối Tool SieuCap5s.com</h2>
+            <h2 className={styles.sectionTitle}>🧪 Test Kết Nối QVTool API</h2>
             <div className={styles.importSection}>
               <p className={styles.importHint}>
-                Chạy thử nghiệm tự động hóa Puppeteer kết nối vào tool <strong>Nhập Mã Quà Tặng SK Thẻ LSR</strong> trên <code>sieucap5s.com</code>.
+                Gửi thử một lượt chạy tới <strong>QVTool</strong> bằng API server-to-server. API key chỉ nằm ở backend, không gửi xuống trình duyệt.
               </p>
 
               <div style={{ marginBottom: 16 }}>
                 <label style={{ display: 'block', color: '#eab308', fontWeight: 'bold', marginBottom: 8 }}>
-                  Nhập Mã Quà Tặng SK Thẻ LSR / Mã Chung Sức để Test:
+                  Nhập mã Chung Sức để test:
                 </label>
                 <input
                   type="text"
@@ -538,20 +512,20 @@ export function AdminPage() {
                   disabled={testRunning || !testCode.trim()}
                   style={{ background: 'linear-gradient(135deg, #d97706, #f59e0b)', color: '#000', fontWeight: 'bold', padding: '12px 28px' }}
                 >
-                  {testRunning ? '⏳ Đang khởi chạy Puppeteer và cày test...' : '🚀 Chạy Test Tool Ngay (1 Acc)'}
+                  {testRunning ? '⏳ Đang tạo lượt chạy QVTool...' : '🚀 Chạy Test QVTool Ngay'}
                 </button>
 
                 <button
                   className={styles.refreshBtn}
-                  onClick={() => setActiveTab('cookies')}
+                  onClick={() => loadDashboard()}
                 >
-                  🍪 Kiểm tra Cookies
+                  🔄 Làm mới trạng thái
                 </button>
               </div>
 
               {testRunning && (
                 <div style={{ marginTop: 20, padding: 16, background: 'rgba(59, 130, 246, 0.15)', border: '1px solid #3b82f6', borderRadius: 8, color: '#93c5fd' }}>
-                  ⏳ Hệ thống đang mở trình duyệt ảo Puppeteer ➔ Đăng nhập bằng Cookies ➔ Vào trang tool LSR ➔ Nhập 1 Acc test + Mã quà tặng ➔ Bấm "Bắt đầu"... Vui lòng chờ khoảng 15-30 giây!
+                  ⏳ QVTool đang xử lý lượt chạy. Trạng thái sẽ được cập nhật từ API.
                 </div>
               )}
 
@@ -567,92 +541,20 @@ export function AdminPage() {
                   )}
                   {testResult.results && (
                     <div>
-                      <p><strong>Tổng Bỉ / Thưởng:</strong> {testResult.results.totalBi || 0}</p>
-                      <p><strong>Số Acc thành công:</strong> {testResult.results.success?.length || 0}</p>
-                      <p><strong>Số Acc thất bại:</strong> {testResult.results.failed?.length || 0}</p>
-                      {testResult.results.success?.length > 0 && (
+                      <p><strong>Batch ID:</strong> {testResult.results.id || testResult.results.batchId || '—'}</p>
+                      <p><strong>Trạng thái:</strong> {testResult.results.status || '—'}</p>
+                      <p><strong>Tổng thưởng:</strong> {testResult.results.reward ?? testResult.results.totalBi ?? 0}</p>
+                      <p><strong>Thành công:</strong> {Array.isArray(testResult.results.success) ? testResult.results.success.length : (testResult.results.success ?? 0)}</p>
+                      <p><strong>Đã xử lý:</strong> {testResult.results.processed ?? testResult.results.rows?.length ?? 0}/{testResult.results.total ?? 0}</p>
+                      {testResult.results.rows?.length > 0 && (
                         <div style={{ background: 'rgba(0,0,0,0.4)', padding: 10, borderRadius: 6, marginTop: 8 }}>
-                          <strong>Chi tiết Success:</strong>
+                          <strong>Chi tiết:</strong>
                           <pre style={{ margin: 0, fontSize: 13, color: '#a7f3d0' }}>
-                            {JSON.stringify(testResult.results.success, null, 2)}
-                          </pre>
-                        </div>
-                      )}
-                      {testResult.results.failed?.length > 0 && (
-                        <div style={{ background: 'rgba(0,0,0,0.4)', padding: 10, borderRadius: 6, marginTop: 8 }}>
-                          <strong>Chi tiết Failed:</strong>
-                          <pre style={{ margin: 0, fontSize: 13, color: '#fecaca' }}>
-                            {JSON.stringify(testResult.results.failed, null, 2)}
+                            {JSON.stringify(testResult.results.rows, null, 2)}
                           </pre>
                         </div>
                       )}
                     </div>
-                  )}
-                </div>
-              )}
-            </div>
-          </div>
-        )}
-
-        {/* ========== COOKIES SIEUCAP5S ========== */}
-        {activeTab === 'cookies' && (
-          <div>
-            <h2 className={styles.sectionTitle}>🍪 Cấu Hình Cookies SieuCap5s.com</h2>
-            <div className={styles.importSection}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16 }}>
-                <span style={{ fontSize: 16 }}>
-                  Trạng thái Cookies hiện tại:
-                </span>
-                {cookieStatus?.hasCookies ? (
-                  <span style={{ background: '#10b981', color: '#fff', padding: '4px 12px', borderRadius: 20, fontWeight: 'bold' }}>
-                    🟢 Đã có ({cookieStatus.count} cookies)
-                  </span>
-                ) : (
-                  <span style={{ background: '#ef4444', color: '#fff', padding: '4px 12px', borderRadius: 20, fontWeight: 'bold' }}>
-                    🔴 Chưa có Cookies
-                  </span>
-                )}
-                {cookieStatus?.updatedAt && (
-                  <span style={{ color: '#9ca3af', fontSize: 13 }}>
-                    (Cập nhật: {new Date(cookieStatus.updatedAt).toLocaleString('vi-VN')})
-                  </span>
-                )}
-              </div>
-
-              <div style={{ background: 'rgba(234, 179, 8, 0.1)', border: '1px solid rgba(234, 179, 8, 0.3)', padding: 16, borderRadius: 8, marginBottom: 20 }}>
-                <h4 style={{ color: '#eab308', margin: '0 0 8px 0' }}>💡 Hướng dẫn lấy Cookies SieuCap5s từ trình duyệt của bạn:</h4>
-                <ol style={{ margin: 0, paddingLeft: 20, color: '#d1d5db', lineHeight: 1.6 }}>
-                  <li>Mở tab <strong>sieucap5s.com</strong> mà bạn đang đăng nhập tài khoản Google.</li>
-                  <li>Bấm phím <strong>F12</strong> (hoặc chuột phải chọn <em>Inspect / Kiểm tra</em>) ➔ Chọn tab <strong>Console</strong>.</li>
-                  <li>Gõ lệnh: <code>copy(document.cookie)</code> rồi nhấn <strong>Enter</strong>.</li>
-                  <li>Dán nội dung vừa copy vào ô dưới đây rồi bấm <strong>"💾 Lưu Cookies"</strong>.</li>
-                </ol>
-              </div>
-
-              <textarea
-                className={styles.importTextarea}
-                value={cookieInput}
-                onChange={(e) => setCookieInput(e.target.value)}
-                placeholder="Dán chuỗi cookies (VD: ASP.NET_SessionId=...; cf_clearance=...) vào đây..."
-                rows={6}
-              />
-
-              <div className={styles.importActions}>
-                <button
-                  className={styles.importBtn}
-                  onClick={handleSaveCookies}
-                  disabled={cookieSaving || !cookieInput.trim()}
-                >
-                  {cookieSaving ? '⏳ Đang lưu...' : '💾 Lưu Cookies Vào Hệ Thống'}
-                </button>
-              </div>
-
-              {cookieResult && (
-                <div className={cookieResult.error ? styles.importError : styles.importSuccess}>
-                  {cookieResult.error ? (
-                    <span>❌ {cookieResult.error}</span>
-                  ) : (
-                    <span>✅ {cookieResult.message}</span>
                   )}
                 </div>
               )}
@@ -914,7 +816,7 @@ export function AdminPage() {
                       value={pkg.accRequired || 0}
                       onChange={(e) => {
                         const accReq = parseInt(e.target.value) || 0;
-                        const biAcc = pkg.biPerAcc || 25;
+                        const biAcc = pkg.biPerAcc || 38;
                         setEditedSettings((prev) => ({
                           ...prev,
                           [id]: {
@@ -930,11 +832,11 @@ export function AdminPage() {
                   </div>
 
                   <div className={styles.settingsRow}>
-                    <label>Bỉ/ACC:</label>
+                    <label>Vé nhảy/ACC:</label>
                     <input
                       type="number"
                       min={1}
-                      value={pkg.biPerAcc || 25}
+                      value={pkg.biPerAcc || 38}
                       onChange={(e) => {
                         const biAcc = parseInt(e.target.value) || 0;
                         const accReq = pkg.accRequired || 1;
@@ -984,9 +886,9 @@ export function AdminPage() {
                   </div>
 
                   <div className={styles.settingsRow} style={{ borderTop: '1px solid rgba(255,255,255,0.06)', paddingTop: 8, marginTop: 8 }}>
-                    <label style={{ fontWeight: 'bold' }}>⭐ Tổng Bỉ:</label>
+                    <label style={{ fontWeight: 'bold' }}>⭐ Tổng Vé nhảy:</label>
                     <span className={styles.calcBi}>
-                      {(pkg.accRequired || 0) * (pkg.biPerAcc || 25)} Bỉ
+                      {(pkg.accRequired || 0) * (pkg.biPerAcc || 38)} Vé nhảy
                     </span>
                   </div>
                 </div>
