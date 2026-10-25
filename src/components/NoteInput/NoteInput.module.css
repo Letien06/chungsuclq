@@ -7,7 +7,19 @@
   align-items: center;
   gap: 6px;
   margin-bottom: 12px;
+  width: 100%;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
 }
+
+.titleBox:hover .sectionTitle { color: #ff8a33; }
+.titleBox:focus-visible { outline: 2px solid var(--accent-orange); outline-offset: 4px; border-radius: 4px; }
+
+.titleBox svg { margin-left: auto; color: #94a3b8; }
 
 .stepNumber {
   font-family: var(--font-game);

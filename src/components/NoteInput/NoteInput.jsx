@@ -1,19 +1,21 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useApp } from '../../context/AppContext';
-import { MessageSquareText } from 'lucide-react';
+import { ChevronDown, ChevronUp } from 'lucide-react';
 import styles from './NoteInput.module.css';
 
 export const NoteInput = () => {
   const { note, setNote } = useApp();
+  const [isExpanded, setIsExpanded] = useState(false);
 
   return (
     <section className={styles.section}>
-      <div className={styles.titleBox}>
+      <button className={styles.titleBox} type="button" onClick={() => setIsExpanded((value) => !value)} aria-expanded={isExpanded}>
         <span className={styles.stepNumber}>4.</span>
         <h2 className={styles.sectionTitle}>GHI CHÚ (NẾU CÓ)</h2>
-      </div>
+        {isExpanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+      </button>
 
-      <div className={styles.container}>
+      {isExpanded && <div className={styles.container}>
         <textarea
           className={styles.textarea}
           rows={3}
@@ -23,7 +25,7 @@ export const NoteInput = () => {
           maxLength={300}
         />
         <div className={styles.counter}>{note.length}/300 ký tự</div>
-      </div>
+      </div>}
     </section>
   );
 };

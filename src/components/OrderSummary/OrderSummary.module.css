@@ -209,3 +209,49 @@
   box-shadow: 0 4px 20px rgba(234, 88, 12, 0.45);
   font-size: 14px;
 }
+
+@media (max-width: 640px) {
+  .summaryCard {
+    position: static;
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: center;
+    gap: 6px 12px;
+    padding: 0;
+    background: transparent;
+    border: 0;
+    box-shadow: none;
+  }
+
+  .header {
+    grid-column: 1;
+    grid-row: 1;
+    padding: 0;
+    border: 0;
+  }
+
+  .headerIcon { width: 15px; height: 15px; }
+  .headerTitle { font-size: 11px; }
+  .detailsList,
+  .divider,
+  .memberNotice,
+  .balanceStatus { display: none; }
+
+  .totalRow {
+    grid-column: 2;
+    grid-row: 1;
+    padding: 0;
+    gap: 8px;
+  }
+
+  .totalLabel { display: none; }
+  .totalAmount { font-size: 22px; }
+
+  .ctaButton {
+    grid-column: 1 / -1;
+    grid-row: 2;
+    padding: 10px 12px;
+    font-size: 13px;
+    box-shadow: none;
+  }
+}

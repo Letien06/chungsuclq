@@ -1,12 +1,15 @@
 import React from 'react';
-import { Sparkles, Check, Flame } from 'lucide-react';
+import { Check, Flame } from 'lucide-react';
 import styles from './PackageCard.module.css';
 
 export const PackageCard = ({ pkg, isSelected, onSelect }) => {
   return (
-    <div
+    <button
+      type="button"
       className={`${styles.card} ${isSelected ? styles.selected : ''} ${pkg.isPriority ? styles.priorityCard : ''}`}
       onClick={() => onSelect(pkg.id)}
+      aria-pressed={isSelected}
+      aria-label={`${pkg.name}, ${pkg.price.toLocaleString('vi-VN')} đồng, ${pkg.bi} Vé nhảy`}
     >
       {/* Top Badge */}
       {pkg.badge && (
@@ -46,6 +49,6 @@ export const PackageCard = ({ pkg, isSelected, onSelect }) => {
           style={{ width: `${pkg.progress}%` }}
         />
       </div>
-    </div>
+    </button>
   );
 };

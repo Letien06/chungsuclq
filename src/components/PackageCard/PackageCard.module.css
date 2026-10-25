@@ -1,5 +1,8 @@
 .card {
   position: relative;
+  width: 100%;
+  text-align: left;
+  font: inherit;
   background: #111827;
   border: 1.5px solid #1f2d45;
   border-radius: var(--radius-md);
@@ -10,6 +13,11 @@
   flex-direction: column;
   gap: 8px;
   user-select: none;
+}
+
+.card:focus-visible {
+  outline: 2px solid var(--accent-orange);
+  outline-offset: 3px;
 }
 
 .card:hover {
