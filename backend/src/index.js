@@ -42,8 +42,26 @@ try {
 const app = express();
 
 // Middleware
+// Keep the API usable from the deployed storefront domains while still
+// allowing a custom origin list for local/staging environments.
+const configuredOrigins = String(process.env.CORS_ORIGIN || '')
+  .split(',')
+  .map((origin) => origin.trim())
+  .filter(Boolean);
+const allowedOrigins = new Set([
+  ...configuredOrigins,
+  'https://www.tiencoder.tech',
+  'https://tiencoder.tech',
+  'https://chungsuclq-kappa.vercel.app',
+]);
+
 app.use(cors({
-  origin: process.env.CORS_ORIGIN || '*',
+  origin(origin, callback) {
+    // Requests without an Origin header (curl, server-to-server, health
+    // checks) are safe to allow and do not need a CORS response header.
+    if (!origin || allowedOrigins.has(origin)) return callback(null, true);
+    return callback(null, false);
+  },
   credentials: true,
 }));
 app.use(express.json({ limit: '10mb' }));
