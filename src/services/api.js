@@ -108,6 +108,13 @@ export async function updateSiteInfo(siteInfo) {
   });
 }
 
+export async function updatePaymentInfo(paymentInfo) {
+  return apiRequest('/settings/payment-info', {
+    method: 'PUT',
+    body: JSON.stringify(paymentInfo),
+  });
+}
+
 export async function resetSettings() {
   return apiRequest('/settings/reset', {
     method: 'POST',

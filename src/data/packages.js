@@ -169,6 +169,8 @@ export const INITIAL_TICKER_ITEMS = [
 ];
 
 export const BANK_PAYMENT_INFO = {
+  // VietQR uses the bank short code in the image path (MB, VCB, ACB, ...).
+  bankCode: 'MB',
   bankName: 'MB BANK (Ngân hàng Quân Đội)',
   accountNumber: '999988886666',
   accountName: 'NGUYEN VAN CHUNG SUC',

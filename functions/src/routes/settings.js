@@ -18,22 +18,44 @@ const router = express.Router();
 router.get('/', async (req, res) => {
   try {
     const db = getFirestore();
-    const doc = await db.collection('settings').doc('packages').get();
+    const [doc, paymentDoc] = await Promise.all([
+      db.collection('settings').doc('packages').get(),
+      db.collection('settings').doc('payment_info').get(),
+    ]);
 
     if (!doc.exists) {
       // Return defaults
       res.json({
         packages: config.defaultPackages,
         isDefault: true,
+        paymentInfo: paymentDoc.exists ? paymentDoc.data() : config.defaultPaymentInfo,
       });
     } else {
       res.json({
         packages: doc.data(),
         isDefault: false,
+        paymentInfo: paymentDoc.exists ? paymentDoc.data() : config.defaultPaymentInfo,
       });
     }
   } catch (error) {
     console.error('[API] Get settings error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+router.put('/payment-info', async (req, res) => {
+  try {
+    const paymentInfo = req.body;
+    const required = ['bankCode', 'bankName', 'accountNumber', 'accountName', 'momoPhone', 'momoName'];
+    if (!paymentInfo || typeof paymentInfo !== 'object' || required.some((key) => !String(paymentInfo[key] || '').trim())) {
+      return res.status(400).json({ error: 'Thiếu thông tin tài khoản thanh toán bắt buộc' });
+    }
+    const normalized = Object.fromEntries(Object.entries(paymentInfo).map(([key, value]) => [key, String(value || '').trim()]));
+    normalized.bankCode = normalized.bankCode.toUpperCase();
+    await getFirestore().collection('settings').doc('payment_info').set(normalized, { merge: true });
+    res.json({ success: true, paymentInfo: normalized });
+  } catch (error) {
+    console.error('[API] Update payment-info error:', error);
     res.status(500).json({ error: error.message });
   }
 });

@@ -52,6 +52,15 @@ const config = {
   },
 
   // Admin
+  defaultPaymentInfo: {
+    bankCode: 'MB',
+    bankName: 'MB BANK (Ngân hàng Quân Đội)',
+    accountNumber: '999988886666',
+    accountName: 'NGUYEN VAN CHUNG SUC',
+    transferPrefix: 'CSLQ',
+    momoPhone: '0988776655',
+    momoName: 'NGUYEN VAN CHUNG SUC',
+  },
   adminPassword: process.env.ADMIN_PASSWORD || 'changeme123',
 
   // Worker account cooldown (ms) - 24 hours default

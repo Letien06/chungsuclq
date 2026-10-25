@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
 import { useApp } from '../../context/AppContext';
-import { BANK_PAYMENT_INFO } from '../../data/packages';
+import { buildVietQrUrl } from '../../utils/vietqr';
 import { X, QrCode, Smartphone, CreditCard, Copy, Check, Zap, Sparkles, ShieldCheck } from 'lucide-react';
 import styles from './TopUpModal.module.css';
 
 export const TopUpModal = () => {
-  const { activeModal, closeModal, user, topUpBalance, addToast } = useApp();
+  const { activeModal, closeModal, user, topUpBalance, addToast, paymentInfo } = useApp();
   const [method, setMethod] = useState('bank'); // 'bank' | 'momo' | 'card'
   const [selectedAmount, setSelectedAmount] = useState(50000);
   const [copiedField, setCopiedField] = useState(null);
@@ -18,7 +18,7 @@ export const TopUpModal = () => {
   if (activeModal !== 'topup') return null;
 
   const username = user?.username || 'CSLQ_GUEST';
-  const transferContent = `NAP ${username} ${selectedAmount / 1000}K`;
+  const transferContent = `${paymentInfo.transferPrefix || 'NAP'} ${username} ${selectedAmount / 1000}K`;
 
   const handleCopy = (text, fieldName) => {
     navigator.clipboard.writeText(text);
@@ -40,7 +40,13 @@ export const TopUpModal = () => {
     }, 1500);
   };
 
-  const qrUrl = `https://img.vietqr.io/image/MB-${BANK_PAYMENT_INFO.accountNumber}-compact2.png?amount=${selectedAmount}&addInfo=${encodeURIComponent(transferContent)}&accountName=${encodeURIComponent(BANK_PAYMENT_INFO.accountName)}`;
+  const qrUrl = buildVietQrUrl({
+    bankCode: paymentInfo.bankCode,
+    accountNumber: paymentInfo.accountNumber,
+    amount: selectedAmount,
+    description: transferContent,
+    accountName: paymentInfo.accountName,
+  });
 
   return (
     <div className={styles.overlay} onClick={closeModal}>
@@ -127,16 +133,16 @@ export const TopUpModal = () => {
             <div className={styles.infoSide}>
               <div className={styles.bankInfoItem}>
                 <span className={styles.infoKey}>Ngân Hàng:</span>
-                <span className={styles.infoVal}>{BANK_PAYMENT_INFO.bankName}</span>
+                <span className={styles.infoVal}>{paymentInfo.bankName}</span>
               </div>
 
               <div className={styles.bankInfoItem}>
                 <span className={styles.infoKey}>Số Tài Khoản:</span>
                 <div className={styles.copyRow}>
-                  <span className={styles.infoValHighlight}>{BANK_PAYMENT_INFO.accountNumber}</span>
+                  <span className={styles.infoValHighlight}>{paymentInfo.accountNumber}</span>
                   <button
                     className={styles.copyBtn}
-                    onClick={() => handleCopy(BANK_PAYMENT_INFO.accountNumber, 'Số tài khoản')}
+                    onClick={() => handleCopy(paymentInfo.accountNumber, 'Số tài khoản')}
                   >
                     {copiedField === 'Số tài khoản' ? <Check size={14} color="#22c55e" /> : <Copy size={14} />}
                   </button>
@@ -145,7 +151,7 @@ export const TopUpModal = () => {
 
               <div className={styles.bankInfoItem}>
                 <span className={styles.infoKey}>Chủ Tài Khoản:</span>
-                <span className={styles.infoVal}>{BANK_PAYMENT_INFO.accountName}</span>
+                <span className={styles.infoVal}>{paymentInfo.accountName}</span>
               </div>
 
               <div className={styles.bankInfoItem}>
@@ -180,10 +186,10 @@ export const TopUpModal = () => {
               <div className={styles.bankInfoItem}>
                 <span className={styles.infoKey}>Số Điện Thoại:</span>
                 <div className={styles.copyRow}>
-                  <span className={styles.infoValHighlight}>{BANK_PAYMENT_INFO.momoPhone}</span>
+                  <span className={styles.infoValHighlight}>{paymentInfo.momoPhone}</span>
                   <button
                     className={styles.copyBtn}
-                    onClick={() => handleCopy(BANK_PAYMENT_INFO.momoPhone, 'SĐT MoMo')}
+                    onClick={() => handleCopy(paymentInfo.momoPhone, 'SĐT MoMo')}
                   >
                     <Copy size={14} />
                   </button>
@@ -191,7 +197,7 @@ export const TopUpModal = () => {
               </div>
               <div className={styles.bankInfoItem}>
                 <span className={styles.infoKey}>Người Nhận:</span>
-                <span className={styles.infoVal}>{BANK_PAYMENT_INFO.momoName}</span>
+                <span className={styles.infoVal}>{paymentInfo.momoName}</span>
               </div>
               <div className={styles.bankInfoItem}>
                 <span className={styles.infoKey}>Nội Dung:</span>

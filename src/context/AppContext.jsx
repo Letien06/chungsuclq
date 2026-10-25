@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, useRef, useCallback } from 'react';
-import { PACKAGES, INITIAL_TICKER_ITEMS, SAMPLE_HISTORIES } from '../data/packages';
+import { PACKAGES, INITIAL_TICKER_ITEMS, SAMPLE_HISTORIES, BANK_PAYMENT_INFO } from '../data/packages';
 import * as api from '../services/api';
 import { signInWithGoogle, signOutUser } from '../services/firebaseAuth';
 import confetti from 'canvas-confetti';
@@ -161,6 +161,7 @@ export const AppProvider = ({ children }) => {
     telegramUrl: 'https://t.me',
     supportHotline: '0988.xxx.xxx',
   });
+  const [paymentInfo, setPaymentInfo] = useState(BANK_PAYMENT_INFO);
 
   // Fetch dynamic packages and prices from backend
   useEffect(() => {
@@ -175,6 +176,7 @@ export const AppProvider = ({ children }) => {
         if (data && data.siteInfo) {
           setSiteInfo(data.siteInfo);
         }
+        if (data && data.paymentInfo) setPaymentInfo({ ...BANK_PAYMENT_INFO, ...data.paymentInfo });
       })
       .catch((err) => {
         console.warn('Could not load dynamic settings, using default packages:', err);
@@ -396,6 +398,7 @@ export const AppProvider = ({ children }) => {
         topUpBalance,
         packages,
         siteInfo,
+        paymentInfo,
         selectedPackageId,
         setSelectedPackageId,
         currentPackage,

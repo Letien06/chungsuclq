@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import styles from './AdminPage.module.css';
 import * as api from '../../services/api';
+import { BANK_PAYMENT_INFO } from '../../data/packages';
+import { buildVietQrUrl, VIETQR_BANKS } from '../../utils/vietqr';
 
 const createPackageId = (packages) => {
   const base = 'new_service';
@@ -76,6 +78,10 @@ export function AdminPage() {
     brandSubtitle: 'SỰ KIỆN CHUNG SỨC • UY TÍN • SIÊU TỐC',
     footerTitle: 'CHUNGSUCLIENQUAN.COM',
     footerSubtitle: 'Hệ Thống Cày Tự Động Siêu Tốc',
+  });
+  const [editedPaymentInfo, setEditedPaymentInfo] = useState({
+    ...BANK_PAYMENT_INFO,
+    transferPrefix: 'NAP',
   });
 
   // Live Test Tool
@@ -169,6 +175,9 @@ export function AdminPage() {
         setSiteInfo(settingsData.siteInfo);
         setEditedSiteInfo(settingsData.siteInfo);
       }
+      if (settingsData.paymentInfo) {
+        setEditedPaymentInfo({ ...BANK_PAYMENT_INFO, ...settingsData.paymentInfo });
+      }
     } catch (err) {
       console.error('Load dashboard error:', err);
     }
@@ -185,6 +194,27 @@ export function AdminPage() {
     } catch (err) {
       alert('Lỗi: ' + err.message);
     }
+    setLoading(false);
+  };
+
+  const handleSavePaymentInfo = async () => {
+    const normalized = {
+      ...editedPaymentInfo,
+      bankCode: String(editedPaymentInfo.bankCode || '').trim().toUpperCase(),
+      accountNumber: String(editedPaymentInfo.accountNumber || '').replace(/\s+/g, ''),
+      accountName: String(editedPaymentInfo.accountName || '').trim().toUpperCase(),
+    };
+    if (!normalized.bankCode || !normalized.accountNumber || !normalized.accountName) {
+      alert('Vui lòng nhập đủ mã ngân hàng, số tài khoản và chủ tài khoản.');
+      return;
+    }
+    setEditedPaymentInfo(normalized);
+    setLoading(true);
+    try {
+      await api.updatePaymentInfo(normalized);
+      alert('Đã lưu thông tin thanh toán!');
+      await loadDashboard();
+    } catch (err) { alert('Lỗi: ' + err.message); }
     setLoading(false);
   };
 
@@ -355,6 +385,14 @@ export function AdminPage() {
     failed: 'Thất bại',
   };
 
+  const paymentQrPreview = buildVietQrUrl({
+    bankCode: editedPaymentInfo.bankCode,
+    accountNumber: editedPaymentInfo.accountNumber,
+    amount: 50000,
+    description: `${editedPaymentInfo.transferPrefix || 'NAP'} DEMO 50K`,
+    accountName: editedPaymentInfo.accountName,
+  });
+
   return (
     <div className={styles.admin}>
       {/* Header */}
@@ -392,6 +430,7 @@ export function AdminPage() {
           { id: 'orders', label: '📦 Đơn hàng' },
           { id: 'accounts', label: '👥 Kho ACC' },
           { id: 'branding', label: '🌐 Tên Miền & Logo' },
+          { id: 'payment', label: '💳 Tài khoản nhận tiền' },
           { id: 'settings', label: '⚙️ Giá & Gói Cước' },
           { id: 'test', label: '🧪 Test QVTool API' },
         ].map((tab) => (
@@ -824,6 +863,58 @@ export function AdminPage() {
                   {loading ? '⏳ Đang lưu...' : '💾 Lưu Thay Đổi Tên Miền & Thương Hiệu'}
                 </button>
               </div>
+            </div>
+          </div>
+        )}
+
+        {/* ========== PAYMENT ========== */}
+        {activeTab === 'payment' && (
+          <div className={styles.settingsCard} style={{ maxWidth: 860 }}>
+            <h2 className={styles.sectionTitle}>💳 Tài khoản nhận tiền</h2>
+            <p className={styles.settingsHint}>Chọn ngân hàng và nhập tài khoản nhận tiền. QR VietQR ở bên phải sẽ tự cập nhật theo thông tin hiện tại.</p>
+            <div className={styles.paymentGrid}>
+              <div>
+                <div className={styles.settingsRow}>
+                  <label htmlFor="payment-bank">Ngân hàng:</label>
+                  <select
+                    id="payment-bank"
+                    value={editedPaymentInfo.bankCode || ''}
+                    onChange={(e) => {
+                      const bank = VIETQR_BANKS.find((item) => item.code === e.target.value);
+                      setEditedPaymentInfo((prev) => ({
+                        ...prev,
+                        bankCode: e.target.value,
+                        bankName: bank?.name || prev.bankName,
+                      }));
+                    }}
+                  >
+                    {VIETQR_BANKS.map((bank) => <option key={bank.code} value={bank.code}>{bank.name} ({bank.code})</option>)}
+                  </select>
+                </div>
+                {[
+                  ['accountNumber', 'Số tài khoản'], ['accountName', 'Chủ tài khoản'],
+                  ['transferPrefix', 'Tiền tố nội dung CK'], ['momoPhone', 'Số điện thoại MoMo'], ['momoName', 'Tên người nhận MoMo'],
+                ].map(([key, label]) => (
+                  <div className={styles.settingsRow} key={key}>
+                    <label htmlFor={`payment-${key}`}>{label}:</label>
+                    <input id={`payment-${key}`} value={editedPaymentInfo[key] || ''} onChange={(e) => setEditedPaymentInfo((prev) => ({ ...prev, [key]: e.target.value }))} />
+                  </div>
+                ))}
+                <p style={{ color: '#94a3b8', fontSize: 12, margin: '4px 0 0' }}>
+                  QR mẫu dùng số tiền 50.000đ. Khi khách chọn số tiền khác, QR sẽ tự đổi theo số tiền đó.
+                </p>
+              </div>
+              <div className={styles.paymentQrPreview}>
+                {paymentQrPreview ? (
+                  <img src={paymentQrPreview} alt="QR VietQR xem trước" style={{ width: '100%', height: 'auto' }} />
+                ) : (
+                  <div style={{ color: '#64748b', fontSize: 12, padding: '56px 8px' }}>Nhập đủ thông tin để tạo QR</div>
+                )}
+                <div style={{ color: '#334155', fontSize: 11, fontWeight: 700, marginTop: 6 }}>VietQR mẫu · 50.000đ</div>
+              </div>
+            </div>
+            <div className={styles.settingsActions} style={{ marginTop: 20 }}>
+              <button className={styles.saveBtn} onClick={handleSavePaymentInfo} disabled={loading}>💾 Lưu thông tin thanh toán</button>
             </div>
           </div>
         )}

@@ -18,18 +18,41 @@ const router = express.Router();
 router.get('/', async (req, res) => {
   try {
     const db = getFirestore();
-    const [pkgDoc, siteDoc] = await Promise.all([
+    const [pkgDoc, siteDoc, paymentDoc] = await Promise.all([
       db.collection('settings').doc('packages').get(),
       db.collection('settings').doc('site_info').get(),
+      db.collection('settings').doc('payment_info').get(),
     ]);
 
     res.json({
       packages: pkgDoc.exists ? pkgDoc.data() : config.defaultPackages,
       siteInfo: siteDoc.exists ? siteDoc.data() : config.defaultSiteInfo,
+      paymentInfo: paymentDoc.exists ? paymentDoc.data() : config.defaultPaymentInfo,
       isDefault: !pkgDoc.exists,
     });
   } catch (error) {
     console.error('[API] Get settings error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// PUT /api/settings/payment-info
+router.put('/payment-info', async (req, res) => {
+  try {
+    const paymentInfo = req.body;
+    if (!paymentInfo || typeof paymentInfo !== 'object') {
+      return res.status(400).json({ error: 'Invalid paymentInfo format' });
+    }
+    const required = ['bankCode', 'bankName', 'accountNumber', 'accountName', 'momoPhone', 'momoName'];
+    if (required.some((key) => !String(paymentInfo[key] || '').trim())) {
+      return res.status(400).json({ error: 'Thiếu thông tin tài khoản thanh toán bắt buộc' });
+    }
+    const normalized = Object.fromEntries(Object.entries(paymentInfo).map(([key, value]) => [key, String(value || '').trim()]));
+    normalized.bankCode = normalized.bankCode.toUpperCase();
+    await getFirestore().collection('settings').doc('payment_info').set(normalized, { merge: true });
+    res.json({ success: true, paymentInfo: normalized });
+  } catch (error) {
+    console.error('[API] Update payment-info error:', error);
     res.status(500).json({ error: error.message });
   }
 });

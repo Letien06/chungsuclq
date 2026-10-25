@@ -652,6 +652,40 @@
   border-color: #eab308;
 }
 
+.settingsRow select {
+  width: 160px;
+  padding: 8px 12px;
+  background: rgba(0, 0, 0, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 6px;
+  color: #e5e7eb;
+  font-size: 14px;
+  outline: none;
+}
+
+.settingsRow select:focus {
+  border-color: #eab308;
+}
+
+.paymentGrid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 220px;
+  gap: 24px;
+  align-items: start;
+}
+
+.paymentQrPreview {
+  background: #fff;
+  border-radius: 10px;
+  padding: 10px;
+  text-align: center;
+}
+
+.paymentQrPreview img {
+  width: 100%;
+  height: auto;
+}
+
 .calcBi {
   font-size: 16px;
   font-weight: 700;
@@ -768,7 +802,20 @@
     width: 100%;
   }
 
+  .settingsRow select {
+    width: 100%;
+  }
+
   .settingsActions > button {
     flex: 1 1 100%;
+  }
+
+  .paymentGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .paymentQrPreview {
+    max-width: 220px;
+    justify-self: center;
   }
 }
