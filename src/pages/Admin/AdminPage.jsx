@@ -2,6 +2,51 @@ import React, { useState, useEffect, useCallback } from 'react';
 import styles from './AdminPage.module.css';
 import * as api from '../../services/api';
 
+const createPackageId = (packages) => {
+  const base = 'new_service';
+  let suffix = 1;
+  let id = `${base}_${suffix}`;
+  while (Object.prototype.hasOwnProperty.call(packages, id)) {
+    suffix += 1;
+    id = `${base}_${suffix}`;
+  }
+  return id;
+};
+
+const createDefaultPackage = (id) => ({
+  id,
+  name: 'Gói dịch vụ mới',
+  price: 0,
+  memberPrice: 0,
+  accRequired: 1,
+  biPerAcc: 38,
+  totalBi: 38,
+  bi: 38,
+  badge: '',
+  description: '',
+  isPriority: false,
+  speedText: 'Tốc độ siêu tốc',
+});
+
+const normalizePackageMap = (packages) => Object.entries(packages || {}).reduce((next, [id, rawPackage]) => {
+  const pkg = rawPackage && typeof rawPackage === 'object' ? rawPackage : {};
+  const accRequired = Math.max(1, parseInt(pkg.accRequired, 10) || 1);
+  const biPerAcc = Math.max(1, parseInt(pkg.biPerAcc, 10) || 38);
+  const totalBi = accRequired * biPerAcc;
+  next[id] = {
+    ...pkg,
+    id,
+    name: String(pkg.name || id),
+    price: Math.max(0, Number(pkg.price) || 0),
+    memberPrice: Math.max(0, Number(pkg.memberPrice) || 0),
+    accRequired,
+    biPerAcc,
+    totalBi,
+    bi: totalBi,
+  };
+  return next;
+}, {});
+
 export function AdminPage() {
   // Auth
   const [isAuthed, setIsAuthed] = useState(false);
@@ -43,6 +88,42 @@ export function AdminPage() {
 
   const [isLoggingIn, setIsLoggingIn] = useState(false);
 
+  // Package editing helpers. Every update clones both the settings map and
+  // the selected package so fields from the server are never dropped.
+  const updateEditedPackage = (id, changes) => {
+    setEditedSettings((prev) => {
+      const current = prev[id];
+      if (!current) return prev;
+      const patch = typeof changes === 'function' ? changes(current) : changes;
+      return { ...prev, [id]: { ...current, ...patch } };
+    });
+  };
+
+  const handleAddPackage = () => {
+    setSettingsEditing(true);
+    setEditedSettings((prev) => {
+      const id = createPackageId(prev);
+      return { ...prev, [id]: createDefaultPackage(id) };
+    });
+  };
+
+  const handleDeletePackage = (id) => {
+    if (Object.keys(editedSettings).length <= 1) {
+      alert('Phải giữ lại ít nhất một gói dịch vụ.');
+      return;
+    }
+    const packageName = editedSettings[id]?.name || id;
+    if (!window.confirm(`Xóa gói dịch vụ "${packageName}"? Thay đổi chỉ được lưu khi bấm Lưu.`)) {
+      return;
+    }
+    setEditedSettings((prev) => {
+      if (!Object.prototype.hasOwnProperty.call(prev, id)) return prev;
+      const next = { ...prev };
+      delete next[id];
+      return next;
+    });
+  };
+
   // Login
   const handleLogin = async () => {
     if (!password.trim()) {
@@ -81,8 +162,9 @@ export function AdminPage() {
       ]);
       setStats(statsData);
       setOrders(ordersData.orders || []);
-      setSettings(settingsData);
-      setEditedSettings(settingsData.packages || {});
+      const normalizedPackages = normalizePackageMap(settingsData.packages);
+      setSettings({ ...settingsData, packages: normalizedPackages });
+      setEditedSettings(normalizedPackages);
       if (settingsData.siteInfo) {
         setSiteInfo(settingsData.siteInfo);
         setEditedSiteInfo(settingsData.siteInfo);
@@ -157,11 +239,42 @@ export function AdminPage() {
 
   // Save settings
   const handleSaveSettings = async () => {
+    // Canonicalize each package before sending it. The object key is the
+    // package ID used by orders; keeping it as the `id` field prevents stale
+    // IDs from older Firestore documents from breaking order creation.
+    const packagesToSave = Object.entries(editedSettings).reduce((next, [id, rawPackage]) => {
+      const pkg = rawPackage && typeof rawPackage === 'object' ? rawPackage : {};
+      const name = String(pkg.name || '').trim();
+      if (!name) return next;
+      const accRequired = Math.max(1, parseInt(pkg.accRequired, 10) || 1);
+      const biPerAcc = Math.max(1, parseInt(pkg.biPerAcc, 10) || 38);
+      const totalBi = accRequired * biPerAcc;
+      next[id] = {
+        ...pkg,
+        id,
+        name,
+        price: Math.max(0, Number(pkg.price) || 0),
+        memberPrice: Math.max(0, Number(pkg.memberPrice) || 0),
+        accRequired,
+        biPerAcc,
+        totalBi,
+        bi: totalBi,
+      };
+      return next;
+    }, {});
+
+    if (Object.keys(packagesToSave).length !== Object.keys(editedSettings).length) {
+      alert('Vui lòng nhập tên cho tất cả các gói trước khi lưu.');
+      return;
+    }
     setLoading(true);
     try {
-      await api.updateSettings(editedSettings);
+      const result = await api.updateSettings(packagesToSave);
+      const savedPackages = result?.packages || packagesToSave;
+      setEditedSettings(savedPackages);
+      setSettings((prev) => ({ ...(prev || {}), packages: savedPackages }));
       setSettingsEditing(false);
-      loadDashboard();
+      await loadDashboard();
       alert('Đã lưu cấu hình!');
     } catch (err) {
       alert('Lỗi: ' + err.message);
@@ -726,6 +839,14 @@ export function AdminPage() {
                 </p>
               </div>
               <div className={styles.settingsActions}>
+                <button
+                  className={styles.addPackageBtn}
+                  onClick={handleAddPackage}
+                  disabled={loading}
+                  type="button"
+                >
+                  ➕ Thêm gói dịch vụ
+                </button>
                 {settingsEditing ? (
                   <>
                     <button className={styles.saveBtn} onClick={handleSaveSettings} disabled={loading}>
@@ -752,13 +873,35 @@ export function AdminPage() {
             <div className={styles.settingsCards}>
               {Object.entries(editedSettings).map(([id, pkg]) => (
                 <div key={id} className={styles.settingsCard}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+                  <div className={styles.settingsCardHeader}>
                     <h3 className={styles.pkgName} style={{ margin: 0 }}>{pkg.name || id}</h3>
-                    {pkg.badge && (
-                      <span style={{ background: '#eab308', color: '#000', fontSize: 11, fontWeight: 'bold', padding: '2px 8px', borderRadius: 12 }}>
-                        {pkg.badge}
-                      </span>
-                    )}
+                    <div className={styles.packageCardActions}>
+                      {pkg.badge && (
+                        <span className={styles.packageBadge}>{pkg.badge}</span>
+                      )}
+                      {settingsEditing && (
+                        <button
+                          type="button"
+                          className={styles.deletePackageBtn}
+                          onClick={() => handleDeletePackage(id)}
+                          aria-label={`Xóa gói ${pkg.name || id}`}
+                          title="Xóa gói dịch vụ"
+                        >
+                          🗑️
+                        </button>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className={styles.settingsRow}>
+                    <label>Mã gói (ID):</label>
+                    <input
+                      className={styles.packageIdInput}
+                      type="text"
+                      value={pkg.id || id}
+                      readOnly
+                      aria-label={`Mã gói ${pkg.name || id}`}
+                    />
                   </div>
 
                   <div className={styles.settingsRow}>
@@ -766,12 +909,7 @@ export function AdminPage() {
                     <input
                       type="text"
                       value={pkg.name || ''}
-                      onChange={(e) =>
-                        setEditedSettings((prev) => ({
-                          ...prev,
-                          [id]: { ...prev[id], name: e.target.value },
-                        }))
-                      }
+                      onChange={(e) => updateEditedPackage(id, { name: e.target.value })}
                       disabled={!settingsEditing}
                     />
                   </div>
@@ -782,12 +920,7 @@ export function AdminPage() {
                       type="number"
                       step={1000}
                       value={pkg.price ?? 0}
-                      onChange={(e) =>
-                        setEditedSettings((prev) => ({
-                          ...prev,
-                          [id]: { ...prev[id], price: Number(e.target.value) },
-                        }))
-                      }
+                      onChange={(e) => updateEditedPackage(id, { price: Number(e.target.value) })}
                       disabled={!settingsEditing}
                     />
                   </div>
@@ -798,12 +931,7 @@ export function AdminPage() {
                       type="number"
                       step={1000}
                       value={pkg.memberPrice ?? 0}
-                      onChange={(e) =>
-                        setEditedSettings((prev) => ({
-                          ...prev,
-                          [id]: { ...prev[id], memberPrice: Number(e.target.value) },
-                        }))
-                      }
+                      onChange={(e) => updateEditedPackage(id, { memberPrice: Number(e.target.value) })}
                       disabled={!settingsEditing}
                     />
                   </div>
@@ -814,19 +942,11 @@ export function AdminPage() {
                       type="number"
                       min={1}
                       value={pkg.accRequired || 0}
-                      onChange={(e) => {
-                        const accReq = parseInt(e.target.value) || 0;
-                        const biAcc = pkg.biPerAcc || 38;
-                        setEditedSettings((prev) => ({
-                          ...prev,
-                          [id]: {
-                            ...prev[id],
-                            accRequired: accReq,
-                            totalBi: accReq * biAcc,
-                            bi: accReq * biAcc,
-                          },
-                        }));
-                      }}
+                      onChange={(e) => updateEditedPackage(id, (current) => {
+                        const accReq = Math.max(1, parseInt(e.target.value, 10) || 1);
+                        const biAcc = Math.max(1, parseInt(current.biPerAcc, 10) || 38);
+                        return { accRequired: accReq, totalBi: accReq * biAcc, bi: accReq * biAcc };
+                      })}
                       disabled={!settingsEditing}
                     />
                   </div>
@@ -837,19 +957,11 @@ export function AdminPage() {
                       type="number"
                       min={1}
                       value={pkg.biPerAcc || 38}
-                      onChange={(e) => {
-                        const biAcc = parseInt(e.target.value) || 0;
-                        const accReq = pkg.accRequired || 1;
-                        setEditedSettings((prev) => ({
-                          ...prev,
-                          [id]: {
-                            ...prev[id],
-                            biPerAcc: biAcc,
-                            totalBi: accReq * biAcc,
-                            bi: accReq * biAcc,
-                          },
-                        }));
-                      }}
+                      onChange={(e) => updateEditedPackage(id, (current) => {
+                        const biAcc = Math.max(1, parseInt(e.target.value, 10) || 1);
+                        const accReq = Math.max(1, parseInt(current.accRequired, 10) || 1);
+                        return { biPerAcc: biAcc, totalBi: accReq * biAcc, bi: accReq * biAcc };
+                      })}
                       disabled={!settingsEditing}
                     />
                   </div>
@@ -860,12 +972,7 @@ export function AdminPage() {
                       type="text"
                       value={pkg.badge || ''}
                       placeholder="ƯU TIÊN, VIP, HOT..."
-                      onChange={(e) =>
-                        setEditedSettings((prev) => ({
-                          ...prev,
-                          [id]: { ...prev[id], badge: e.target.value },
-                        }))
-                      }
+                      onChange={(e) => updateEditedPackage(id, { badge: e.target.value })}
                       disabled={!settingsEditing}
                     />
                   </div>
@@ -875,12 +982,7 @@ export function AdminPage() {
                     <input
                       type="text"
                       value={pkg.description || ''}
-                      onChange={(e) =>
-                        setEditedSettings((prev) => ({
-                          ...prev,
-                          [id]: { ...prev[id], description: e.target.value },
-                        }))
-                      }
+                      onChange={(e) => updateEditedPackage(id, { description: e.target.value })}
                       disabled={!settingsEditing}
                     />
                   </div>
