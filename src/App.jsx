@@ -44,14 +44,15 @@ function MainSite() {
 function App() {
   return (
     <BrowserRouter>
-      <AppProvider>
-        <div className="app">
-          <Routes>
-            <Route path="/admin" element={<AdminPage />} />
-            <Route path="/*" element={<MainSite />} />
-          </Routes>
-        </div>
-      </AppProvider>
+      <div className="app">
+        <Routes>
+          {/* Admin does not depend on public storefront configuration. Keeping
+              it outside AppProvider also prevents a second startup flash while
+              public packages/site settings are loading. */}
+          <Route path="/admin" element={<AdminPage />} />
+          <Route path="/*" element={<AppProvider><MainSite /></AppProvider>} />
+        </Routes>
+      </div>
     </BrowserRouter>
   );
 }

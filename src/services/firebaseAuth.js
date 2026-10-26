@@ -60,4 +60,11 @@ export async function getCurrentUserIdToken(forceRefresh = false) {
   return currentUser.getIdToken(forceRefresh);
 }
 
+// Used by protected pages to wait for Firebase's persisted session before
+// deciding whether to show a login form. This prevents the admin login card
+// from flashing for an already authenticated administrator on reload.
+export async function waitForAuthReady() {
+  return auth.currentUser || await authReady;
+}
+
 export { onAuthStateChanged };

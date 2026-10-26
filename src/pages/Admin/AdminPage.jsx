@@ -3,7 +3,7 @@ import styles from './AdminPage.module.css';
 import * as api from '../../services/api';
 import { BANK_PAYMENT_INFO } from '../../data/packages';
 import { buildVietQrUrl, VIETQR_BANKS } from '../../utils/vietqr';
-import { signInWithGoogle, signOutUser } from '../../services/firebaseAuth';
+import { signInWithGoogle, signOutUser, waitForAuthReady } from '../../services/firebaseAuth';
 
 const ADMIN_EMAIL = 'letiendk06@gmail.com';
 
@@ -55,6 +55,7 @@ const normalizePackageMap = (packages) => Object.entries(packages || {}).reduce(
 export function AdminPage() {
   // Auth
   const [isAuthed, setIsAuthed] = useState(false);
+  const [authChecked, setAuthChecked] = useState(false);
   const [authError, setAuthError] = useState('');
 
   // Dashboard data
@@ -104,6 +105,40 @@ export function AdminPage() {
   const [activeTab, setActiveTab] = useState('dashboard');
 
   const [isLoggingIn, setIsLoggingIn] = useState(false);
+  const [dashboardReady, setDashboardReady] = useState(false);
+
+  // Restore an existing Google session before rendering the login card. The
+  // old flow always started with `isAuthed=false`, which caused a visible
+  // login-card -> dashboard jump on every admin reload.
+  useEffect(() => {
+    let cancelled = false;
+    waitForAuthReady().then(async (firebaseUser) => {
+      if (cancelled) return;
+      if (!firebaseUser) {
+        setAuthChecked(true);
+        return;
+      }
+      const email = String(firebaseUser.email || '').trim().toLowerCase();
+      if (email !== ADMIN_EMAIL) {
+        setAuthError(`Chỉ tài khoản ${ADMIN_EMAIL} được truy cập trang quản trị.`);
+        setAuthChecked(true);
+        return;
+      }
+      try {
+        const data = await api.getAdminStats();
+        if (cancelled) return;
+        setStats(data);
+        setIsAuthed(true);
+      } catch (error) {
+        if (!cancelled) setAuthError('Phiên quản trị đã hết hạn. Vui lòng đăng nhập lại.');
+      } finally {
+        if (!cancelled) setAuthChecked(true);
+      }
+    }).catch(() => {
+      if (!cancelled) setAuthChecked(true);
+    });
+    return () => { cancelled = true; };
+  }, []);
 
   // Package editing helpers. Every update clones both the settings map and
   // the selected package so fields from the server are never dropped.
@@ -155,6 +190,7 @@ export function AdminPage() {
       const data = await api.getAdminStats();
       setStats(data);
       setIsAuthed(true);
+      setAuthChecked(true);
     } catch (err) {
       console.error('Admin login error:', err);
       if (err.code === 'auth/popup-closed-by-user') return;
@@ -168,6 +204,7 @@ export function AdminPage() {
   const loadDashboard = useCallback(async () => {
     if (!isAuthed) return;
     setLoading(true);
+    setDashboardReady(false);
     try {
       // Keep each dashboard section independent. A temporary orders/index
       // error must not blank the settings/packages tab (or vice versa).
@@ -207,6 +244,7 @@ export function AdminPage() {
       console.error('Load dashboard error:', err);
     }
     setLoading(false);
+    setDashboardReady(true);
   }, [isAuthed]);
 
   const loadUsers = useCallback(async () => {
@@ -418,6 +456,19 @@ export function AdminPage() {
   };
 
   // Login screen
+  if (!authChecked) {
+    return (
+      <div className={styles.loginContainer}>
+        <div className={styles.loginBox} role="status" aria-live="polite">
+          <div className={styles.loginIcon}>🛡️</div>
+          <h2>Admin Panel</h2>
+          <p>Đang kiểm tra phiên quản trị…</p>
+          <div className={styles.loginLoadingBar} aria-hidden="true"><span /></div>
+        </div>
+      </div>
+    );
+  }
+
   if (!isAuthed) {
     return (
       <div className={styles.loginContainer}>
@@ -430,6 +481,19 @@ export function AdminPage() {
             {isLoggingIn ? '⏳ Đang xác thực Google...' : '🔐 Đăng nhập bằng Google'}
           </button>
           <small style={{ display: 'block', marginTop: 14, color: '#94a3b8' }}>Chỉ tài khoản được cấp quyền mới truy cập được.</small>
+        </div>
+      </div>
+    );
+  }
+
+  if (!dashboardReady) {
+    return (
+      <div className={styles.loginContainer}>
+        <div className={styles.loginBox} role="status" aria-live="polite">
+          <div className={styles.loginIcon}>⚙️</div>
+          <h2>Đang tải Admin Panel</h2>
+          <p>Đang đồng bộ dữ liệu quản trị…</p>
+          <div className={styles.loginLoadingBar} aria-hidden="true"><span /></div>
         </div>
       </div>
     );
