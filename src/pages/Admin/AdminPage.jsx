@@ -3,6 +3,9 @@ import styles from './AdminPage.module.css';
 import * as api from '../../services/api';
 import { BANK_PAYMENT_INFO } from '../../data/packages';
 import { buildVietQrUrl, VIETQR_BANKS } from '../../utils/vietqr';
+import { signInWithGoogle, signOutUser } from '../../services/firebaseAuth';
+
+const ADMIN_EMAIL = 'letiendk06@gmail.com';
 
 const createPackageId = (packages) => {
   const base = 'new_service';
@@ -52,7 +55,6 @@ const normalizePackageMap = (packages) => Object.entries(packages || {}).reduce(
 export function AdminPage() {
   // Auth
   const [isAuthed, setIsAuthed] = useState(false);
-  const [password, setPassword] = useState('');
   const [authError, setAuthError] = useState('');
 
   // Dashboard data
@@ -139,27 +141,24 @@ export function AdminPage() {
     });
   };
 
-  // Login
+  // Admin login: Google identity is verified by Firebase and the backend
+  // enforces the same allowlist. No password-only fallback is permitted.
   const handleLogin = async () => {
-    if (!password.trim()) {
-      setAuthError('Vui lòng nhập mật khẩu admin!');
-      return;
-    }
     setAuthError('');
     setIsLoggingIn(true);
-    localStorage.setItem('cslq_admin_password', password.trim());
     try {
+      const googleUser = await signInWithGoogle();
+      if (String(googleUser.email || '').trim().toLowerCase() !== ADMIN_EMAIL) {
+        await signOutUser();
+        throw new Error(`Chỉ tài khoản ${ADMIN_EMAIL} được truy cập trang quản trị.`);
+      }
       const data = await api.getAdminStats();
       setStats(data);
       setIsAuthed(true);
     } catch (err) {
       console.error('Admin login error:', err);
-      if (err.message && err.message.includes('401')) {
-        setAuthError('❌ Sai mật khẩu admin!');
-      } else {
-        setAuthError(`❌ ${err.message || 'Lỗi kết nối máy chủ'}. (Máy chủ Render đang kết nối, vui lòng thử lại sau vài giây).`);
-      }
-      localStorage.removeItem('cslq_admin_password');
+      if (err.code === 'auth/popup-closed-by-user') return;
+      setAuthError(`❌ ${err.message || 'Không thể xác thực tài khoản Google.'}`);
     } finally {
       setIsLoggingIn(false);
     }
@@ -294,22 +293,6 @@ export function AdminPage() {
   };
 
   useEffect(() => {
-    // Check if admin password is saved
-    const saved = localStorage.getItem('cslq_admin_password');
-    if (saved) {
-      setPassword(saved);
-      api.getAdminStats()
-        .then((data) => {
-          setStats(data);
-          setIsAuthed(true);
-        })
-        .catch(() => {
-          localStorage.removeItem('cslq_admin_password');
-        });
-    }
-  }, []);
-
-  useEffect(() => {
     loadDashboard();
   }, [loadDashboard]);
 
@@ -423,22 +406,14 @@ export function AdminPage() {
     return (
       <div className={styles.loginContainer}>
         <div className={styles.loginBox}>
-          <div className={styles.loginIcon}>🔒</div>
+          <div className={styles.loginIcon}>🛡️</div>
           <h2>Admin Panel</h2>
-          <p>Nhập mật khẩu admin để truy cập</p>
-          <input
-            type="password"
-            className={styles.loginInput}
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            onKeyDown={(e) => e.key === 'Enter' && handleLogin()}
-            placeholder="Mật khẩu admin..."
-            autoFocus
-          />
+          <p>Đăng nhập bằng Google để xác minh quyền quản trị</p>
           {authError && <div className={styles.authError}>{authError}</div>}
           <button className={styles.loginBtn} onClick={handleLogin} disabled={isLoggingIn}>
-            {isLoggingIn ? '⏳ Đang xác thực...' : 'Đăng nhập'}
+            {isLoggingIn ? '⏳ Đang xác thực Google...' : '🔐 Đăng nhập bằng Google'}
           </button>
+          <small style={{ display: 'block', marginTop: 14, color: '#94a3b8' }}>Chỉ tài khoản được cấp quyền mới truy cập được.</small>
         </div>
       </div>
     );
@@ -488,8 +463,8 @@ export function AdminPage() {
           </button>
           <button
             className={styles.logoutBtn}
-            onClick={() => {
-              localStorage.removeItem('cslq_admin_password');
+            onClick={async () => {
+              await signOutUser().catch(() => {});
               setIsAuthed(false);
             }}
           >

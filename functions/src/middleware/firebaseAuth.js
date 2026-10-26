@@ -27,19 +27,46 @@ async function requireFirebaseUser(req, res, next) {
 }
 
 function isAdminRequest(req, config) {
-  const password = req.headers['x-admin-password'] || req.query.adminPassword;
-  return Boolean(password && password === config.adminPassword);
+  return Boolean(req.isAdmin);
 }
 
-/** Allow the admin dashboard or a signed-in Firebase user. */
-function requireAdminOrFirebaseUser(config) {
+function requireAdminGoogleUser(config) {
   return async (req, res, next) => {
-    if (isAdminRequest(req, config)) {
+    const token = getBearerToken(req);
+    if (!token) return res.status(401).json({ error: 'Đăng nhập Google bằng tài khoản admin để tiếp tục.' });
+    try {
+      const user = await getAuth().verifyIdToken(token);
+      const email = String(user.email || '').trim().toLowerCase();
+      const allowed = Array.isArray(config.adminGoogleEmails) && config.adminGoogleEmails.includes(email);
+      if (!allowed || user.email_verified === false) {
+        return res.status(403).json({ error: 'Tài khoản Google này không có quyền quản trị.' });
+      }
+      req.user = user;
       req.isAdmin = true;
       return next();
+    } catch (error) {
+      console.warn('[AdminAuth] Invalid Firebase ID token:', error.code || error.message);
+      return res.status(401).json({ error: 'Phiên Google admin không hợp lệ hoặc đã hết hạn.' });
     }
-    return requireFirebaseUser(req, res, next);
   };
 }
 
-module.exports = { getBearerToken, requireFirebaseUser, requireAdminOrFirebaseUser, isAdminRequest };
+function requireAdminOrFirebaseUser(config) {
+  return async (req, res, next) => {
+    const token = getBearerToken(req);
+    if (!token) return res.status(401).json({ error: 'Yêu cầu đăng nhập Google để tiếp tục.' });
+    try {
+      const user = await getAuth().verifyIdToken(token);
+      if (!user.email) return res.status(403).json({ error: 'Tài khoản cần có email để tiếp tục.' });
+      req.user = user;
+      req.isAdmin = Array.isArray(config.adminGoogleEmails)
+        && config.adminGoogleEmails.includes(String(user.email).trim().toLowerCase())
+        && user.email_verified !== false;
+      return next();
+    } catch (error) {
+      return res.status(401).json({ error: 'Phiên đăng nhập không hợp lệ hoặc đã hết hạn.' });
+    }
+  };
+}
+
+module.exports = { getBearerToken, requireFirebaseUser, requireAdminGoogleUser, requireAdminOrFirebaseUser, isAdminRequest };

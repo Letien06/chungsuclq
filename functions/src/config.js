@@ -77,6 +77,10 @@ const config = {
   },
   // Never fall back to a published/default password in production.
   adminPassword: process.env.ADMIN_PASSWORD || '',
+  adminGoogleEmails: String(process.env.ADMIN_GOOGLE_EMAILS || 'letiendk06@gmail.com')
+    .split(',')
+    .map((email) => email.trim().toLowerCase())
+    .filter(Boolean),
 
   // Worker account cooldown (ms) - 24 hours default
   accountCooldownMs: 24 * 60 * 60 * 1000,

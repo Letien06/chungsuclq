@@ -145,6 +145,13 @@ const config = {
   },
   // Never fall back to a published/default password in production.
   adminPassword: process.env.ADMIN_PASSWORD || '',
+  // Admin access is granted only to these verified Firebase/Google accounts.
+  // Keep the default aligned with the owner's account; deployments can add
+  // more addresses through ADMIN_GOOGLE_EMAILS (comma-separated) if needed.
+  adminGoogleEmails: String(process.env.ADMIN_GOOGLE_EMAILS || 'letiendk06@gmail.com')
+    .split(',')
+    .map((email) => email.trim().toLowerCase())
+    .filter(Boolean),
 
   // Worker account cooldown (ms) - 24 hours default
   accountCooldownMs: 24 * 60 * 60 * 1000,

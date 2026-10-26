@@ -11,6 +11,7 @@ const { initializeApp } = require('firebase-admin/app');
 const express = require('express');
 const cors = require('cors');
 const config = require('./config');
+const { requireAdminGoogleUser } = require('./middleware/firebaseAuth');
 
 // Initialize Firebase Admin
 initializeApp();
@@ -38,16 +39,8 @@ app.use(cors({ origin: true }));
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
 
-// Simple admin auth middleware for protected routes
-const adminAuth = (req, res, next) => {
-  const adminPassword = req.headers['x-admin-password'] || req.query.adminPassword;
-
-  if (adminPassword !== config.adminPassword) {
-    return res.status(401).json({ error: 'Unauthorized - invalid admin password' });
-  }
-
-  next();
-};
+// Admin routes require a verified Firebase ID token from the Google allowlist.
+const adminAuth = requireAdminGoogleUser(config);
 
 // Public routes
 app.use('/api/orders', require('./routes/orders'));

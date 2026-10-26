@@ -16,7 +16,6 @@ const API_BASE = import.meta.env.VITE_API_URL || (
  */
 async function apiRequest(path, options = {}) {
   const url = `${API_BASE}${path}`;
-  const adminPassword = localStorage.getItem('cslq_admin_password') || '';
   let idToken = null;
   try {
     idToken = await getCurrentUserIdToken();
@@ -31,10 +30,6 @@ async function apiRequest(path, options = {}) {
     ...(options.headers || {}),
   };
 
-  // Add admin auth header if available
-  if (adminPassword) {
-    headers['x-admin-password'] = adminPassword;
-  }
   if (idToken) {
     headers.Authorization = `Bearer ${idToken}`;
   }

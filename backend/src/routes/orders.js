@@ -124,7 +124,7 @@ router.get('/:id', requireAdminOrFirebaseUser(config), async (req, res) => {
  * Query: ?status=queued&limit=50
  */
 router.get('/', (req, res, next) => {
-  if (!isAdminRequest(req, config)) {
+  if (!req.isAdmin && !isAdminRequest(req, config)) {
     return res.status(401).json({ error: 'Yêu cầu xác thực quản trị viên.' });
   }
   return next();
