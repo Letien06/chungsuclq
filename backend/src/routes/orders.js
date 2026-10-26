@@ -8,9 +8,7 @@ const config = require('../config');
 const { normalizeChungSucCode } = require('../services/chungSucCode');
 const {
   requireFirebaseUser,
-  requireAdminGoogleUser,
   requireAdminOrFirebaseUser,
-  isAdminRequest,
 } = require('../middleware/firebaseAuth');
 const { orderRateLimit } = require('../middleware/orderRateLimit');
 
@@ -62,6 +60,7 @@ router.post('/', requireFirebaseUser, orderRateLimit, async (req, res) => {
       userId: req.user.uid,
       userEmail: req.user.email || null,
       accRequired: pkg.accRequired,
+      amount: Number(pkg.price) || 0,
       biTarget: pkg.totalBi,
       biDone: 0,
       status: 'queued', // queued | processing | completed | partial | failed
@@ -121,28 +120,25 @@ router.get('/:id', requireAdminOrFirebaseUser(config), async (req, res) => {
 
 /**
  * GET /api/orders
- * List all orders (admin)
+ * List orders. Admins receive all orders; signed-in users receive only their
+ * own orders.
  * Query: ?status=queued&limit=50
  */
-router.get('/', requireAdminGoogleUser(config), (req, res, next) => {
-  if (!req.isAdmin && !isAdminRequest(req, config)) {
-    return res.status(401).json({ error: 'Yêu cầu xác thực quản trị viên.' });
-  }
-  return next();
-}, async (req, res) => {
+router.get('/', requireAdminOrFirebaseUser(config), async (req, res) => {
   try {
     const db = getFirestore();
-    let query = db.collection('orders').orderBy('createdAt', 'desc');
-
-    if (req.query.status) {
-      query = query.where('status', '==', req.query.status);
-    }
+    const isAdmin = Boolean(req.isAdmin);
+    // Customer history uses a simple userId query to avoid requiring a
+    // composite Firestore index; it is sorted and filtered after the read.
+    let query = isAdmin
+      ? db.collection('orders').orderBy('createdAt', 'desc')
+      : db.collection('orders').where('userId', '==', req.user.uid);
 
     const limit = Math.min(parseInt(req.query.limit) || 50, 200);
     query = query.limit(limit);
 
     const snap = await query.get();
-    const orders = snap.docs.map((doc) => {
+    let orders = snap.docs.map((doc) => {
       const data = doc.data();
       return {
         id: doc.id,
@@ -151,6 +147,12 @@ router.get('/', requireAdminGoogleUser(config), (req, res, next) => {
         completedAt: data.completedAt?.toDate?.()?.toISOString?.() || null,
       };
     });
+    if (!isAdmin) {
+      if (req.query.status) orders = orders.filter((order) => order.status === req.query.status);
+      orders.sort((a, b) => String(b.createdAt || '').localeCompare(String(a.createdAt || '')));
+    } else if (req.query.status) {
+      orders = orders.filter((order) => order.status === req.query.status);
+    }
 
     res.json({ orders, total: orders.length });
   } catch (error) {

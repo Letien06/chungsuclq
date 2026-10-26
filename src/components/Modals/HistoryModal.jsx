@@ -12,6 +12,7 @@ export const HistoryModal = () => {
 
   const filteredOrders = orderHistory.filter((ord) => {
     if (filter === 'all') return true;
+    if (filter === 'processing') return ['queued', 'processing', 'partial'].includes(ord.status);
     return ord.status === filter;
   });
 
@@ -51,7 +52,7 @@ export const HistoryModal = () => {
             className={`${styles.filterBtn} ${filter === 'processing' ? styles.filterActive : ''}`}
             onClick={() => setFilter('processing')}
           >
-            Đang Cày ({orderHistory.filter((o) => o.status === 'processing').length})
+            Đang Cày ({orderHistory.filter((o) => ['queued', 'processing', 'partial'].includes(o.status)).length})
           </button>
           <button
             className={`${styles.filterBtn} ${filter === 'completed' ? styles.filterActive : ''}`}
@@ -84,7 +85,7 @@ export const HistoryModal = () => {
                     className={`${styles.statusBadge} ${
                       ord.status === 'completed'
                         ? styles.statusSuccess
-                        : ord.status === 'processing'
+                        : ['queued', 'processing', 'partial'].includes(ord.status)
                         ? styles.statusProcess
                         : styles.statusFail
                     }`}

@@ -169,29 +169,39 @@ export function AdminPage() {
     if (!isAuthed) return;
     setLoading(true);
     try {
-      const [statsData, ordersData, settingsData] = await Promise.all([
+      // Keep each dashboard section independent. A temporary orders/index
+      // error must not blank the settings/packages tab (or vice versa).
+      const [statsResult, ordersResult, settingsResult] = await Promise.allSettled([
         api.getAdminStats(),
         api.listOrders({ limit: 20 }),
         api.getSettings(),
       ]);
-      setStats(statsData);
-      setOrders(ordersData.orders || []);
-      const normalizedPackages = normalizePackageMap(settingsData.packages);
-      setSettings({ ...settingsData, packages: normalizedPackages });
-      setEditedSettings(normalizedPackages);
-      if (settingsData.siteInfo) {
-        setSiteInfo(settingsData.siteInfo);
-        // Keep newly added branding fields visible when loading older settings documents.
-        setEditedSiteInfo((prev) => ({ ...prev, ...settingsData.siteInfo }));
-      }
-      if (settingsData.paymentInfo) {
-        const serverPaymentInfo = settingsData.paymentInfo;
-        const legacyPrefix = ['NAP', 'CSLQ'].includes(String(serverPaymentInfo.transferPrefix || '').trim().toUpperCase());
-        setEditedPaymentInfo({
-          ...BANK_PAYMENT_INFO,
-          ...serverPaymentInfo,
-          transferPrefix: legacyPrefix ? 'UNGHO' : (serverPaymentInfo.transferPrefix || 'UNGHO'),
-        });
+      if (statsResult.status === 'fulfilled') setStats(statsResult.value);
+      else console.error('Load admin stats error:', statsResult.reason);
+      if (ordersResult.status === 'fulfilled') setOrders(ordersResult.value.orders || []);
+      else console.error('Load admin orders error:', ordersResult.reason);
+
+      if (settingsResult.status === 'fulfilled') {
+        const settingsData = settingsResult.value;
+        const normalizedPackages = normalizePackageMap(settingsData.packages);
+        setSettings({ ...settingsData, packages: normalizedPackages });
+        setEditedSettings(normalizedPackages);
+        if (settingsData.siteInfo) {
+          setSiteInfo(settingsData.siteInfo);
+          // Keep newly added branding fields visible when loading older settings documents.
+          setEditedSiteInfo((prev) => ({ ...prev, ...settingsData.siteInfo }));
+        }
+        if (settingsData.paymentInfo) {
+          const serverPaymentInfo = settingsData.paymentInfo;
+          const legacyPrefix = ['NAP', 'CSLQ'].includes(String(serverPaymentInfo.transferPrefix || '').trim().toUpperCase());
+          setEditedPaymentInfo({
+            ...BANK_PAYMENT_INFO,
+            ...serverPaymentInfo,
+            transferPrefix: legacyPrefix ? 'UNGHO' : (serverPaymentInfo.transferPrefix || 'UNGHO'),
+          });
+        }
+      } else {
+        console.error('Load admin settings error:', settingsResult.reason);
       }
     } catch (err) {
       console.error('Load dashboard error:', err);
@@ -1268,28 +1278,8 @@ export function AdminPage() {
               ))}
             </div>
 
-            <div className={styles.settingsActions} style={{ marginTop: 20 }}>
-              {settingsEditing ? (
-                <>
-                  <button className={styles.saveBtn} onClick={handleSaveSettings} disabled={loading}>
-                    💾 Lưu Tất Cả Thay Đổi
-                  </button>
-                  <button
-                    className={styles.cancelBtn}
-                    onClick={() => {
-                      setSettingsEditing(false);
-                      setEditedSettings(settings?.packages || {});
-                    }}
-                  >
-                    ❌ Hủy
-                  </button>
-                </>
-              ) : (
-                <button className={styles.editBtn} onClick={() => setSettingsEditing(true)}>
-                  ✏️ Chỉnh Sửa Giá & Cấu Hình
-                </button>
-              )}
-            </div>
+            {/* Edit/save controls are kept in the section header so the
+                settings page has one clear action area. */}
           </div>
         )}
       </div>

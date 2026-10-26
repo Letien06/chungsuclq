@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, useRef, useCallback } from 'react';
-import { PACKAGES, INITIAL_TICKER_ITEMS, SAMPLE_HISTORIES, BANK_PAYMENT_INFO } from '../data/packages';
+import { PACKAGES, BANK_PAYMENT_INFO } from '../data/packages';
 import * as api from '../services/api';
 import { signInWithGoogle, signOutUser, getCurrentUserIdToken } from '../services/firebaseAuth';
 import confetti from 'canvas-confetti';
@@ -51,9 +51,10 @@ export const AppProvider = ({ children }) => {
   const [note, setNote] = useState('');
 
   // 3. Order History State
+  // Order history is server-owned. Do not seed a new browser with demo orders.
   const [orderHistory, setOrderHistory] = useState(() => {
-    const saved = readStoredJson('cslq_orders', SAMPLE_HISTORIES);
-    return Array.isArray(saved) ? saved : SAMPLE_HISTORIES;
+    const saved = readStoredJson('cslq_orders', []);
+    return Array.isArray(saved) ? saved.filter((order) => order && order.id && order.userId) : [];
   });
 
   // 4. Modal States
@@ -64,7 +65,7 @@ export const AppProvider = ({ children }) => {
   const [toasts, setToasts] = useState([]);
 
   // 6. Live Ticker state
-  const [tickerItems, setTickerItems] = useState(INITIAL_TICKER_ITEMS);
+  const [tickerItems, setTickerItems] = useState([]);
 
   // 7. Polling refs for active orders
   const pollingRef = useRef(new Map());
@@ -85,6 +86,59 @@ export const AppProvider = ({ children }) => {
   useEffect(() => {
     localStorage.setItem('cslq_orders', JSON.stringify(orderHistory));
   }, [orderHistory]);
+
+  // Replace any legacy/local placeholder history with the authenticated
+  // user's real Firestore orders. Anonymous users must see an empty history.
+  useEffect(() => {
+    let cancelled = false;
+    if (!user?.uid) {
+      setOrderHistory([]);
+      try { localStorage.removeItem('cslq_orders'); } catch (_) { /* ignore */ }
+      return undefined;
+    }
+    api.listOrders({ limit: 50 })
+      .then((data) => {
+        if (cancelled) return;
+        const realOrders = (data.orders || []).map((order) => {
+          const target = Number(order.biTarget || order.totalBi || order.bi || 0);
+          const done = Number(order.biDone || (order.status === 'completed' ? target : 0));
+          const progress = target > 0 ? Math.min(100, Math.round((done / target) * 100)) : 0;
+          const statusText = order.status === 'completed'
+            ? 'Hoàn thành'
+            : order.status === 'failed'
+              ? `Thất bại: ${order.error || 'Lỗi không xác định'}`
+              : order.status === 'partial'
+                ? `Hoàn thành 1 phần (${done}/${target} Vé nhảy)`
+                : order.status === 'processing'
+                  ? `Đang cày (${done}/${target} Vé nhảy)`
+                  : 'Đang chờ hệ thống xử lý...';
+          return {
+            ...order,
+            friendCode: order.chungSucCode || order.friendCode || '',
+            packageName: order.packageName || order.packageId || 'Gói dịch vụ',
+            bi: target,
+            biDone: done,
+            amount: Number(order.amount ?? order.price ?? 0),
+            progress,
+            statusText,
+            createdAt: order.createdAt ? new Date(order.createdAt).toLocaleString('vi-VN') : '—',
+          };
+        });
+        setOrderHistory(realOrders);
+        setTickerItems(realOrders.slice(0, 10).map((order) => ({
+          id: `order-${order.id}`,
+          user: `${String(order.customerName || user.displayName || 'Khách').slice(0, 3)}***`,
+          packageName: order.packageName,
+          code: order.friendCode,
+          bi: order.bi,
+          status: order.status === 'completed' ? 'HOÀN THÀNH' : 'ĐANG XỬ LÝ',
+          price: order.amount,
+          time: order.createdAt,
+        })));
+      })
+      .catch((error) => console.warn('[History] Could not load real orders:', error));
+    return () => { cancelled = true; };
+  }, [user?.uid]);
 
   // Cleanup polling on unmount
   useEffect(() => {
@@ -409,6 +463,8 @@ export const AppProvider = ({ children }) => {
 
         const newOrder = {
           id: result.orderId,
+          userId: user.uid,
+          customerName: user.displayName || user.email,
           packageId: currentPackage.id,
           packageName: currentPackage.name,
           friendCode: code,
