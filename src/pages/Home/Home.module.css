@@ -264,8 +264,10 @@
   }
   .leftColumn > *,
   .rightColumn > * {
-    width: calc(100vw - 24px);
-    max-width: calc(100vw - 24px);
+    /* Size against the actual content column, not 100vw (which includes
+       the scrollbar and can clip the right edge on narrow phones). */
+    width: 100%;
+    max-width: 100%;
   }
   .rightColumn {
     position: static;

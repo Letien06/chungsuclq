@@ -57,8 +57,11 @@
 
 #root {
   min-height: 100vh;
-  width: 100%;
-  max-width: 100%;
+  /* Let the block fill the available layout viewport (excluding a
+     vertical scrollbar). Using 100% here can be wider than the visible
+     viewport on narrow mobile screens and creates a clipped right edge. */
+  width: auto;
+  max-width: none;
   min-width: 0;
   overflow-x: clip;
 }
@@ -86,8 +89,11 @@ body {
   background-position: center top;
   background-attachment: fixed;
   overflow-x: hidden;
-  width: 100%;
-  max-width: 100%;
+  /* Auto width keeps the document inside the layout viewport when a
+     scrollbar is present. A fixed 100% body can be a few pixels wider
+     than the visible mobile viewport. */
+  width: auto;
+  max-width: none;
   min-width: 0;
 }
 
