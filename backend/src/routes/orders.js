@@ -8,6 +8,7 @@ const config = require('../config');
 const { normalizeChungSucCode } = require('../services/chungSucCode');
 const {
   requireFirebaseUser,
+  requireAdminGoogleUser,
   requireAdminOrFirebaseUser,
   isAdminRequest,
 } = require('../middleware/firebaseAuth');
@@ -123,7 +124,7 @@ router.get('/:id', requireAdminOrFirebaseUser(config), async (req, res) => {
  * List all orders (admin)
  * Query: ?status=queued&limit=50
  */
-router.get('/', (req, res, next) => {
+router.get('/', requireAdminGoogleUser(config), (req, res, next) => {
   if (!req.isAdmin && !isAdminRequest(req, config)) {
     return res.status(401).json({ error: 'Yêu cầu xác thực quản trị viên.' });
   }
