@@ -51,7 +51,7 @@ async function apiRequest(path, options = {}) {
 // Orders API
 // ==========================================
 
-export async function createOrder({ chungSucCode, packageId, quantity = 1 }) {
+export async function createOrder({ chungSucCode, packageId, quantity = 1, clientRequestId = '' }) {
   const idToken = await getCurrentUserIdToken();
   if (!idToken) {
     throw new Error('Vui lòng đăng nhập Google trước khi đặt đơn.');
@@ -59,7 +59,7 @@ export async function createOrder({ chungSucCode, packageId, quantity = 1 }) {
   return apiRequest('/orders', {
     method: 'POST',
     headers: { Authorization: `Bearer ${idToken}` },
-    body: JSON.stringify({ chungSucCode, packageId, quantity }),
+    body: JSON.stringify({ chungSucCode, packageId, quantity, clientRequestId }),
   });
 }
 

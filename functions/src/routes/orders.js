@@ -22,6 +22,7 @@ const router = express.Router();
 router.post('/', requireFirebaseUser, orderRateLimit, async (req, res) => {
   try {
     const { chungSucCode, packageId } = req.body;
+    const clientRequestId = String(req.body.clientRequestId || '').trim().slice(0, 120);
     const quantity = Math.min(Math.max(Number.parseInt(req.body.quantity, 10) || 1, 1), 100);
     const normalizedCode = normalizeChungSucCode(chungSucCode);
 
@@ -36,6 +37,13 @@ router.post('/', requireFirebaseUser, orderRateLimit, async (req, res) => {
 
     // Get package settings
     const db = getFirestore();
+    if (clientRequestId) {
+      const duplicateSnap = await db.collection('orders').where('userId', '==', req.user.uid).where('clientRequestId', '==', clientRequestId).limit(1).get();
+      if (!duplicateSnap.empty) {
+        const existing = duplicateSnap.docs[0];
+        return res.status(200).json({ success: true, duplicate: true, orderId: existing.id, ...existing.data(), balanceAfter: null });
+      }
+    }
     const settingsSnap = await db.collection('settings').doc('packages').get();
     const packages = settingsSnap.exists
       ? settingsSnap.data()
@@ -68,6 +76,7 @@ router.post('/', requireFirebaseUser, orderRateLimit, async (req, res) => {
       chungSucCode: normalizedCode,
       packageId,
       packageName: pkg.name,
+      clientRequestId: clientRequestId || null,
       quantity,
       customerName,
       userId: req.user.uid,

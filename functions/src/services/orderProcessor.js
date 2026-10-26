@@ -36,7 +36,8 @@ async function claimOrder(db, orderRef) {
     const data = snap.data();
     const target = asNumber(data.biTarget);
     const resumablePartial = data.status === 'partial' && asNumber(data.biDone) < target;
-    if (data.status !== 'queued' && !resumablePartial) return data;
+    const pendingBatch = data.status === 'processing' && data.qvtoolBatchPending === true;
+    if (data.status !== 'queued' && !resumablePartial && !pendingBatch) return data;
     transaction.update(orderRef, { status: 'processing', processingStartedAt: FieldValue.serverTimestamp() });
     return { ...data, status: 'processing' };
   });
@@ -75,9 +76,28 @@ async function processOrder(orderId) {
   const maxAccounts = Math.max(initialCount, asNumber(config.maxOrderAccounts, 100));
   let claimedOwnAccounts = 0;
   let activeAccounts = [];
+  let pendingBatchState = null;
   let lastSource = order.qvtoolSource || null;
 
   try {
+    if (order.qvtoolBatchPending && order.qvtoolBatchId) {
+      const pending = qvtool.normalizeResults(await qvtool.waitForBatch(order.qvtoolBatchId));
+      if (pending.timedOut) {
+        await orderRef.update({ status: 'processing', qvtoolBatchPending: true });
+        return { success: false, message: 'QVTool batch vẫn đang xử lý, chưa tạo batch mới.' };
+      }
+      const pendingAccounts = await accountPool.getAccountsByIds(order.qvtoolBatchAccountIds || []);
+      await settleAccounts(pendingAccounts, pending);
+      if (pending.batchId && !batchIds.includes(pending.batchId)) batchIds.push(pending.batchId);
+      batchNumber = batchIds.length;
+      biDone += pending.totalBi;
+      successCount += pending.success.length;
+      failedCount += pending.failed.length;
+      charged += pending.charged;
+      await writeBatchLogs(db, orderId, batchNumber || 1, 'resume', pending);
+      await orderRef.update({ qvtoolBatchPending: false, qvtoolBatchAccountIds: [], biDone, successCount, failedCount, charged, status: 'processing' });
+      firstBatch = false;
+    }
     while (firstBatch || biDone < target) {
       const neededBi = Math.max(0, target - biDone);
       const calculated = firstBatch ? initialCount : Math.max(1, Math.ceil(neededBi / perAccountBi));
@@ -98,8 +118,17 @@ async function processOrder(orderId) {
       claimedOwnAccounts += accounts.length;
       const perCode = source === 'own' ? accounts.length : requested;
       const batch = await qvtool.createBatch({ code: order.chungSucCode, accounts, perCode, source });
+      await orderRef.update({ status: 'processing', qvtoolBatchPending: true, qvtoolBatchId: batch.id, qvtoolBatchAccountIds: accounts.map((account) => account.id), qvtoolSource: source });
+      pendingBatchState = { id: batch.id, accountIds: accounts.map((account) => account.id), source };
       const result = qvtool.normalizeResults(await qvtool.waitForBatch(batch.id));
+      if (result.timedOut) {
+        await orderRef.update({ status: 'processing', qvtoolBatchPending: true, qvtoolBatchId: batch.id, qvtoolBatchAccountIds: pendingBatchState.accountIds, qvtoolSource: source });
+        pendingBatchState = null;
+        activeAccounts = [];
+        return { success: false, message: 'QVTool batch vẫn đang xử lý.' };
+      }
       await settleAccounts(accounts, result);
+      pendingBatchState = null;
       activeAccounts = [];
       batchNumber += 1;
       batchIds.push(result.batchId);
@@ -109,7 +138,7 @@ async function processOrder(orderId) {
       charged += result.charged;
       lastSource = source;
       await writeBatchLogs(db, orderId, batchNumber, firstBatch ? 'initial' : 'topup', result);
-      await orderRef.update({ status: 'processing', provider: 'qvtool', qvtoolBatchId: result.batchId, qvtoolBatchIds: batchIds, qvtoolSource: source, biDone, biTarget: target, successCount, failedCount, charged });
+      await orderRef.update({ status: 'processing', provider: 'qvtool', qvtoolBatchPending: false, qvtoolBatchAccountIds: [], qvtoolBatchId: result.batchId, qvtoolBatchIds: batchIds, qvtoolSource: source, biDone, biTarget: target, successCount, failedCount, charged });
       firstBatch = false;
       if (result.timedOut || result.status !== 'completed' || result.totalBi <= 0 || result.success.length === 0) break;
       if (batchNumber >= maxBatches) break;
@@ -120,6 +149,10 @@ async function processOrder(orderId) {
     await orderRef.update({ status, provider: 'qvtool', qvtoolBatchIds: batchIds, qvtoolBatchId: batchIds[batchIds.length - 1] || null, qvtoolSource: lastSource, biDone, biTarget: target, successCount, failedCount, charged, completedAt: FieldValue.serverTimestamp(), ...(reachedTarget ? {} : { partialReason: 'target_not_reached_or_account_pool_exhausted' }) });
     return { success: reachedTarget, message: `${status}: ${biDone}/${target} Vé nhảy` };
   } catch (error) {
+    if (pendingBatchState) {
+      await orderRef.update({ status: 'processing', qvtoolBatchPending: true, qvtoolBatchId: pendingBatchState.id, qvtoolBatchAccountIds: pendingBatchState.accountIds, qvtoolSource: pendingBatchState.source, lastError: error.message });
+      return { success: false, message: 'QVTool batch đang xử lý, sẽ được kiểm tra lại.' };
+    }
     if (activeAccounts.length) await accountPool.releaseAccounts(activeAccounts.map((account) => account.id));
     const retryCount = (order.retryCount || 0) + 1;
     if (retryCount < config.maxRetries) await orderRef.update({ status: 'queued', retryCount, biDone, biTarget: target, lastError: error.message });

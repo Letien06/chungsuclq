@@ -40,4 +40,4 @@ function normalizeResults(batch) {
   const failed = rows.filter((r) => r.status !== 'success').map((r) => ({ username: r.username, reason: r.status || 'unknown', raw: r }));
   return { batchId: batch.id, status: batch.status, success, failed, rows, totalBi: success.reduce((sum, r) => sum + r.biEarned, 0), charged: Number(batch.charged || 0), timedOut: Boolean(batch.timedOut), raw: batch };
 }
-module.exports = { createBatch, getBatch, waitForBatch, normalizeResults };
+module.exports = { createBatch, getBatch, waitForBatch, normalizeResults, isTerminal: (status) => TERMINAL.has(status) };

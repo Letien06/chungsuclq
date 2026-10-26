@@ -143,6 +143,8 @@ async function claimAvailableAccounts(count) {
   const db = getDb();
   const cooldownThreshold = new Date(Date.now() - config.accountCooldownMs);
   return db.runTransaction(async (transaction) => {
+    const staleCutoff = Date.now() - config.accountClaimTimeoutMs;
+    const inUseSnap = await transaction.get(db.collection(COLLECTION).where('status', '==', 'in_use').limit(500));
     const availableQuery = db.collection(COLLECTION).where('status', '==', 'available').limit(requested);
     const availableSnap = await transaction.get(availableQuery);
     const candidates = [...availableSnap.docs];
@@ -154,6 +156,12 @@ async function claimAvailableAccounts(count) {
       const cooldownSnap = await transaction.get(cooldownQuery);
       candidates.push(...cooldownSnap.docs);
     }
+    inUseSnap.docs.forEach((doc) => {
+      const claimStarted = doc.data().claimStartedAt?.toDate?.()?.getTime?.() || 0;
+      if (!claimStarted || claimStarted < staleCutoff) {
+        transaction.update(doc.ref, { status: 'available', claimStartedAt: null, reclaimedAt: FieldValue.serverTimestamp() });
+      }
+    });
     return candidates.slice(0, requested).map((doc) => {
       const data = doc.data();
       transaction.update(doc.ref, { status: 'in_use', claimStartedAt: FieldValue.serverTimestamp() });
@@ -226,6 +234,14 @@ async function releaseAccounts(accountIds) {
   }
 
   await batch.commit();
+}
+
+async function getAccountsByIds(accountIds) {
+  const ids = [...new Set((accountIds || []).filter(Boolean))];
+  if (!ids.length) return [];
+  const db = getDb();
+  const docs = await Promise.all(ids.map((id) => db.collection(COLLECTION).doc(id).get()));
+  return docs.filter((doc) => doc.exists).map((doc) => ({ id: doc.id, username: doc.data().username, password: doc.data().password }));
 }
 
 /**
@@ -305,6 +321,7 @@ module.exports = {
   markUsedSuccess,
   markDead,
   releaseAccounts,
+  getAccountsByIds,
   getStats,
   deleteAccount,
   purgeDeadAccounts,

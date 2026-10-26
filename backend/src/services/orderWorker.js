@@ -8,7 +8,9 @@ async function findNextOrder() {
   const queued = await orders.where('status', '==', 'queued').orderBy('createdAt', 'asc').limit(1).get();
   if (!queued.empty) return queued.docs[0];
   const partial = await orders.where('status', '==', 'partial').orderBy('createdAt', 'asc').limit(1).get();
-  return partial.empty ? null : partial.docs[0];
+  if (!partial.empty) return partial.docs[0];
+  const pending = await orders.where('status', '==', 'processing').where('qvtoolBatchPending', '==', true).limit(1).get();
+  return pending.empty ? null : pending.docs[0];
 }
 
 async function processNextQueuedOrder() {

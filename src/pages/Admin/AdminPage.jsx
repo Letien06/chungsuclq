@@ -213,8 +213,14 @@ export function AdminPage() {
     if (!isAuthed) return;
     setUsersLoading(true);
     try {
-      const data = await api.listAdminUsers({ limit: 200 });
-      setUsers(data.users || []);
+      const allUsers = [];
+      let pageToken = null;
+      do {
+        const data = await api.listAdminUsers({ limit: 1000, ...(pageToken ? { pageToken } : {}) });
+        allUsers.push(...(data.users || []));
+        pageToken = data.nextPageToken || null;
+      } while (pageToken && allUsers.length < 10000);
+      setUsers(allUsers);
     } catch (err) {
       alert('Không tải được danh sách người dùng: ' + err.message);
     } finally {

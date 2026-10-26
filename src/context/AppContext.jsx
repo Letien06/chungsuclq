@@ -464,11 +464,13 @@ export const AppProvider = ({ children }) => {
     // 4. Call Backend API for each code
     try {
       let serverBalanceAfter = null;
-      for (const code of codesList) {
+      const submissionId = globalThis.crypto?.randomUUID?.() || `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+      for (const [codeIndex, code] of codesList.entries()) {
         const result = await api.createOrder({
           chungSucCode: code,
           packageId: backendPackageId,
           quantity: isBulk ? 1 : quantity,
+          clientRequestId: `${submissionId}:${codeIndex}`,
         });
         if (Number.isFinite(Number(result.balanceAfter))) serverBalanceAfter = Number(result.balanceAfter);
 

@@ -84,6 +84,7 @@ const config = {
 
   // Worker account cooldown (ms) - 24 hours default
   accountCooldownMs: 24 * 60 * 60 * 1000,
+  accountClaimTimeoutMs: Number(process.env.ACCOUNT_CLAIM_TIMEOUT_MS || 15 * 60 * 1000),
   maxOrderBatches: Number(process.env.MAX_ORDER_BATCHES || 20),
   maxOrderAccounts: Number(process.env.MAX_ORDER_ACCOUNTS || 100),
 
