@@ -481,7 +481,7 @@ export const AppProvider = ({ children }) => {
           friendCode: code,
           codes: [code],
           bi: totalBi / codesList.length,
-          quantity: 1,
+          quantity: isBulk ? 1 : quantity,
           amount: totalPrice / codesList.length,
           note: note.trim(),
           status: 'queued',
