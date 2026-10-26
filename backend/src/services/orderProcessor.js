@@ -58,9 +58,11 @@ async function processOrder(orderId) {
     return { success: false, message: 'Unknown package' };
   }
 
-  const target = Math.max(0, asNumber(pkg.totalBi, asNumber(order.biTarget)));
-  const initialCount = Math.max(1, asNumber(pkg.accRequired, 1));
-  const perAccountBi = Math.max(1, asNumber(pkg.biPerAcc, target / initialCount || 38));
+  // Prefer the immutable values captured when the order was paid. This keeps
+  // an admin price/package edit from changing an already-created order.
+  const target = Math.max(0, asNumber(order.biTarget, asNumber(pkg.totalBi)));
+  const initialCount = Math.max(1, asNumber(order.accRequired, asNumber(pkg.accRequired, 1)));
+  const perAccountBi = Math.max(1, asNumber(order.biPerAcc, asNumber(pkg.biPerAcc, target / initialCount || 38)));
   let biDone = Math.max(0, asNumber(order.biDone));
   let successCount = Math.max(0, asNumber(order.successCount));
   let failedCount = Math.max(0, asNumber(order.failedCount));
@@ -86,7 +88,7 @@ async function processOrder(orderId) {
       if (!requested) break;
       let accounts = await accountPool.claimAvailableAccounts(requested);
       let source = 'own';
-      if (firstBatch && accounts.length < requested) {
+      if (accounts.length < requested) {
         if (accounts.length) await accountPool.releaseAccounts(accounts.map((account) => account.id));
         accounts = [];
         source = 'stock';

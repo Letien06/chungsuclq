@@ -287,6 +287,14 @@ export const AppProvider = ({ children }) => {
         console.warn('Could not load public site info, using defaults:', err);
       });
 
+    api.getPublicPaymentInfo()
+      .then((data) => {
+        if (data && data.paymentInfo) setPaymentInfo((previous) => ({ ...previous, ...data.paymentInfo }));
+      })
+      .catch((err) => {
+        console.warn('Could not load public payment info, using defaults:', err);
+      });
+
     // Admin sessions still receive the full settings payload (including
     // customized branding/payment info). Public storefront sessions get a
     // 401 here and safely keep the bundled defaults.
@@ -455,11 +463,14 @@ export const AppProvider = ({ children }) => {
 
     // 4. Call Backend API for each code
     try {
+      let serverBalanceAfter = null;
       for (const code of codesList) {
         const result = await api.createOrder({
           chungSucCode: code,
           packageId: backendPackageId,
+          quantity: isBulk ? 1 : quantity,
         });
+        if (Number.isFinite(Number(result.balanceAfter))) serverBalanceAfter = Number(result.balanceAfter);
 
         const newOrder = {
           id: result.orderId,
@@ -500,7 +511,11 @@ export const AppProvider = ({ children }) => {
       }
 
       // Deduct balance
-      setUser((prev) => ({ ...prev, balance: prev.balance - totalPrice }));
+      setUser((prev) => ({
+        ...prev,
+        balance: serverBalanceAfter === null ? Math.max(0, prev.balance - totalPrice) : serverBalanceAfter,
+        balanceSource: 'server',
+      }));
 
       // Confetti
       try {

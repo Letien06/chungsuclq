@@ -54,6 +54,14 @@ const toPublicSiteInfo = (value) => PUBLIC_SITE_INFO_KEYS.reduce((result, key) =
   if (value && value[key] !== undefined) result[key] = value[key];
   return result;
 }, {});
+const PUBLIC_PAYMENT_INFO_KEYS = [
+  'bankCode', 'bankName', 'accountNumber', 'accountName',
+  'transferPrefix', 'momoPhone', 'momoName',
+];
+const toPublicPaymentInfo = (value) => PUBLIC_PAYMENT_INFO_KEYS.reduce((result, key) => {
+  if (value && value[key] !== undefined) result[key] = value[key];
+  return result;
+}, {});
 
 // Middleware
 // Keep the API usable from the deployed storefront domains while still
@@ -120,6 +128,19 @@ app.get('/api/site-info', async (_req, res) => {
     res.json({ siteInfo: toPublicSiteInfo(doc.exists ? doc.data() : config.defaultSiteInfo) });
   } catch (error) {
     console.error('[API] Get public site info error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Customers need these fields to pay. Return only the payment instructions;
+// admin-only settings and credentials never leave the protected endpoint.
+app.get('/api/payment-info', async (_req, res) => {
+  try {
+    const { getFirestore } = require('firebase-admin/firestore');
+    const doc = await getFirestore().collection('settings').doc('payment_info').get();
+    res.json({ paymentInfo: toPublicPaymentInfo(doc.exists ? doc.data() : config.defaultPaymentInfo) });
+  } catch (error) {
+    console.error('[API] Get public payment info error:', error);
     res.status(500).json({ error: error.message });
   }
 });

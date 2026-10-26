@@ -51,7 +51,7 @@ async function apiRequest(path, options = {}) {
 // Orders API
 // ==========================================
 
-export async function createOrder({ chungSucCode, packageId }) {
+export async function createOrder({ chungSucCode, packageId, quantity = 1 }) {
   const idToken = await getCurrentUserIdToken();
   if (!idToken) {
     throw new Error('Vui lòng đăng nhập Google trước khi đặt đơn.');
@@ -59,7 +59,7 @@ export async function createOrder({ chungSucCode, packageId }) {
   return apiRequest('/orders', {
     method: 'POST',
     headers: { Authorization: `Bearer ${idToken}` },
-    body: JSON.stringify({ chungSucCode, packageId }),
+    body: JSON.stringify({ chungSucCode, packageId, quantity }),
   });
 }
 
@@ -121,6 +121,12 @@ export async function getPublicPackages() {
 // requested by this endpoint.
 export async function getPublicSiteInfo() {
   return apiRequest('/site-info');
+}
+
+// Payment details are intentionally public because customers need them to
+// make a transfer. The backend endpoint exposes only the payment fields.
+export async function getPublicPaymentInfo() {
+  return apiRequest('/payment-info');
 }
 
 export async function updateSettings(packages) {

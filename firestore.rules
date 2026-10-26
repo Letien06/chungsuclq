@@ -1,10 +1,11 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    // Orders - chỉ backend (admin SDK) mới ghi được
+    // All application access goes through the authenticated backend API.
+    // Admin SDK bypasses these rules; direct browser reads must not expose
+    // orders, invite codes, emails or payment-related metadata.
     match /orders/{orderId} {
-      allow read: if true;
-      allow write: if false;
+      allow read, write: if false;
     }
     // Accounts - chỉ backend
     match /accounts/{accountId} {
@@ -12,13 +13,19 @@ service cloud.firestore {
     }
     // Settings - chỉ backend
     match /settings/{settingId} {
-      allow read: if true;
-      allow write: if false;
+      allow read, write: if false;
     }
     // Order logs
     match /order_logs/{logId} {
-      allow read: if true;
-      allow write: if false;
+      allow read, write: if false;
+    }
+
+    match /user_balances/{uid} {
+      allow read, write: if false;
+    }
+
+    match /{document=**} {
+      allow read, write: if false;
     }
   }
 }
