@@ -187,7 +187,10 @@ button, input, textarea, select { touch-action: manipulation; }
 
 @media (max-width: 640px) {
   html { font-size: 15px; }
-  body { min-width: 320px; }
+  /* Do not force a 320px minimum: the browser's scrollbar reduces the
+     visible layout width on compact phones, which otherwise clips the
+     entire page at the right edge. */
+  body { min-width: 0; }
   body {
     background-attachment: scroll;
     background-image:
