@@ -256,6 +256,17 @@
   .main { padding-top: 14px; padding-bottom: 28px; }
   .container { padding-inline: 12px; }
   .layoutGrid { gap: 20px; }
+  .layoutGrid,
+  .leftColumn,
+  .rightColumn {
+    width: 100%;
+    max-width: 100%;
+  }
+  .leftColumn > *,
+  .rightColumn > * {
+    width: calc(100vw - 24px);
+    max-width: calc(100vw - 24px);
+  }
   .rightColumn {
     position: static;
     width: auto;
