@@ -242,6 +242,7 @@ export const AppProvider = ({ children }) => {
 
   // Dynamic packages & siteInfo state
   const [packages, setPackages] = useState(PACKAGES);
+  const [publicConfigReady, setPublicConfigReady] = useState(false);
   const [siteInfo, setSiteInfo] = useState({
     brandPrimary: 'CHUNGSUC',
     brandAccent: 'LIENQUAN',
@@ -260,40 +261,44 @@ export const AppProvider = ({ children }) => {
     document.title = String(siteInfo?.pageTitle || fallbackTitle).trim();
   }, [siteInfo]);
 
-  // Fetch dynamic packages and prices from backend
+  // Fetch dynamic packages and prices from backend. Do not render the
+  // storefront with bundled demo/default packages first: doing so creates a
+  // visible one-frame flash before Firestore values arrive on mobile Safari.
   useEffect(() => {
-    api.getPublicPackages()
-      .then((data) => {
-        if (!data || !data.packages) return;
-        const pkgList = Object.values(data.packages);
-        if (pkgList.length === 0) return;
-        setPackages(pkgList);
-        // A package can be removed from Admin after the storefront has
-        // initialized. Keep the selection pointing at an available package
-        // so the deleted ID cannot remain active in the order form.
-        setSelectedPackageId((previousId) => (
-          pkgList.some((pkg) => pkg.id === previousId) ? previousId : pkgList[0].id
-        ));
-      })
-      .catch((err) => {
-        console.warn('Could not load dynamic settings, using default packages:', err);
-      });
+    let cancelled = false;
+    Promise.allSettled([
+      api.getPublicPackages(),
+      api.getPublicSiteInfo(),
+      api.getPublicPaymentInfo(),
+    ]).then(([packagesResult, siteResult, paymentResult]) => {
+      if (cancelled) return;
 
-    api.getPublicSiteInfo()
-      .then((data) => {
-        if (data && data.siteInfo) setSiteInfo((previous) => ({ ...previous, ...data.siteInfo }));
-      })
-      .catch((err) => {
-        console.warn('Could not load public site info, using defaults:', err);
-      });
+      if (packagesResult.status === 'fulfilled') {
+        const pkgList = Object.values(packagesResult.value?.packages || {});
+        if (pkgList.length > 0) {
+          setPackages(pkgList);
+          // A package can be removed in Admin. Never keep a deleted ID active.
+          setSelectedPackageId((previousId) => (
+            pkgList.some((pkg) => pkg.id === previousId) ? previousId : pkgList[0].id
+          ));
+        }
+      } else {
+        console.warn('Could not load dynamic packages, using defaults:', packagesResult.reason);
+      }
 
-    api.getPublicPaymentInfo()
-      .then((data) => {
-        if (data && data.paymentInfo) setPaymentInfo((previous) => ({ ...previous, ...data.paymentInfo }));
-      })
-      .catch((err) => {
-        console.warn('Could not load public payment info, using defaults:', err);
-      });
+      if (siteResult.status === 'fulfilled' && siteResult.value?.siteInfo) {
+        setSiteInfo((previous) => ({ ...previous, ...siteResult.value.siteInfo }));
+      } else if (siteResult.status === 'rejected') {
+        console.warn('Could not load public site info, using defaults:', siteResult.reason);
+      }
+
+      if (paymentResult.status === 'fulfilled' && paymentResult.value?.paymentInfo) {
+        setPaymentInfo((previous) => ({ ...previous, ...paymentResult.value.paymentInfo }));
+      } else if (paymentResult.status === 'rejected') {
+        console.warn('Could not load public payment info, using defaults:', paymentResult.reason);
+      }
+      setPublicConfigReady(true);
+    });
 
     // Admin sessions still receive the full settings payload (including
     // customized branding/payment info). Public storefront sessions get a
@@ -311,6 +316,8 @@ export const AppProvider = ({ children }) => {
         });
       })
       .catch(() => { /* Full settings are admin-only; public defaults remain active. */ });
+
+    return () => { cancelled = true; };
   }, []);
 
   // Selected package object
@@ -591,7 +598,13 @@ export const AppProvider = ({ children }) => {
         handleOrderSubmit
       }}
     >
-      {children}
+      {publicConfigReady ? children : (
+        <div className="app-loading" role="status" aria-live="polite">
+          <div className="app-loading__mark">⚔️</div>
+          <div className="app-loading__title">Đang tải dịch vụ</div>
+          <div className="app-loading__bar" aria-hidden="true"><span /></div>
+        </div>
+      )}
     </AppContext.Provider>
   );
 };
